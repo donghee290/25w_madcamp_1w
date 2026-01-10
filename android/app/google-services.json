@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "724382015530",
+    "project_id": "bullshit-minseok",
+    "storage_bucket": "bullshit-minseok.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724382015530:android:b0a2eb0dbe8df5f258e353",
+        "android_client_info": {
+          "package_name": "com.example.bullshit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpYIkCj1N_t_qfexlSvjLmZcCyagICXlo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
