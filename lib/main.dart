@@ -4,6 +4,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'models/alarm_model.dart';
 import 'providers/alarm_provider.dart';
 import 'services/notification_service.dart';
+import 'screens/alarm_result_screen.dart';
+import 'screens/create_alarm_screen.dart'; // import creation screen
+import 'screens/gallery_screen.dart';
+import 'models/alarm_history.dart';
+import 'providers/history_provider.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // [Step 3 검증] Hive 초기화 및 설정
@@ -16,24 +23,105 @@ void main() async {
   // 어댑터 등록 (이 부분이 없으면 에러남)
   Hive.registerAdapter(AlarmAdapter());
   Hive.registerAdapter(MissionTypeAdapter());
+  Hive.registerAdapter(AlarmHistoryAdapter()); // History Adapter
 
   // 박스 열기
   await Hive.openBox<Alarm>('alarmBox');
+  await Hive.openBox<AlarmHistory>('historyBox'); // History Box
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AlarmProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AlarmProvider()),
+        ChangeNotifierProvider(
+          create: (_) => HistoryProvider(),
+        ), // HistoryProvider 추가
+      ],
       child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _configureSelectNotificationSubject();
+  }
+
+  void _configureSelectNotificationSubject() {
+    NotificationService().selectNotificationStream.stream.listen((
+      String? payload,
+    ) async {
+      if (payload != null) {
+        // Payload: id|duration|hour|minute
+        final parts = payload.split('|');
+        if (parts.length >= 4) {
+          final int hour = int.parse(parts[2]);
+          final int minute = int.parse(parts[3]);
+
+          await navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => AlarmResultScreen(
+                scheduledHour: hour,
+                scheduledMinute: minute,
+                payload: payload,
+              ),
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: TestScreen());
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const MainScreen(), // 메인 스크린 분리
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [TestScreen(), const GalleryScreen()];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _selectedIndex, children: _screens),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '알람'),
+          BottomNavigationBarItem(icon: Icon(Icons.collections), label: '갤러리'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 }
 
@@ -73,7 +161,7 @@ class TestScreen extends StatelessWidget {
                     "${alarm.hour}시 ${alarm.minute}분 (${alarm.label})",
                   ),
                   subtitle: Text(
-                    "ID: ${alarm.id.substring(0, 5)}... / 요일: ${alarm.weekdays}",
+                    "ID: ${alarm.id.substring(0, 5)}... / 요일: ${alarm.weekdays}\nSnooze: ${alarm.duration}분 간격",
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
@@ -103,22 +191,12 @@ class TestScreen extends StatelessWidget {
         ],
       ),
 
-      // 3. 알람 추가 버튼 (Create 테스트)
+      // 3. 알람 추가 버튼 (Create 화면 이동)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // 임의의 알람 데이터 생성
-          final now = DateTime.now();
-          final newAlarm = Alarm(
-            id: now.toString(), // 유니크 ID
-            hour: now.hour,
-            minute: now.minute + 1, // 1분 뒤 알람
-            label: "테스트 알람",
-            isEnabled: true,
-            weekdays: [], // 일회성 알람
-            // weekdays: [1, 3, 5], // 월,수,금 반복 테스트하려면 주석 해제
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const CreateAlarmScreen()),
           );
-
-          alarmProvider.addAlarm(newAlarm);
         },
         child: const Icon(Icons.add),
       ),
