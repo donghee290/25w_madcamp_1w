@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.selectionPlatform": "dartfmt",
+        "editor.rulers": [
+            80
+        ]
+    }
+}
