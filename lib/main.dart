@@ -9,7 +9,7 @@ import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
 import 'screens/main_screen.dart';
 import 'screens/feat1_first_alarm/intro_screen.dart';
-import 'package:bullshit/theme/app_colors.dart';
+import 'package:bullshit/theme/app_theme.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -81,13 +81,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: AppColors.baseGray,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          backgroundColor: AppColors.baseGray,
-        ),
-      ),
+      theme: AppTheme.dark,
       home: const _EntryGate(),
     );
   }
