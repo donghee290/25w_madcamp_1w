@@ -62,14 +62,23 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
   Widget _buildHeader(int alarmCount) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
-      // Image shows a "Header" block that looks blended or same gradient as bg.
-      // But distinct from list.
+      // Increased padding: Top 30, Bottom 15
+      padding: const EdgeInsets.fromLTRB(16, 30, 16, 15),
       decoration: const BoxDecoration(
         gradient: AppColors.primaryGradient,
         border: Border(
-          bottom: BorderSide(color: Colors.white, width: 1), // Separator line
+          bottom: BorderSide(
+            color: Color(0xFF6E6E7E),
+            width: 1,
+          ), // Stroke for separation
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 4,
+            offset: Offset(0, 4), // Shadow below
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -79,13 +88,13 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
             '기상 목록',
             style: TextStyle(
               color: AppColors.baseWhite,
-              fontSize: 20, // Looking large
+              fontSize: 22,
               fontFamily: 'HYcysM',
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 25),
 
-          // Subtitle (Time remaining - Placeholder for now)
+          // Subtitle
           const Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -97,7 +106,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 20),
 
           // Buttons Row
           Row(
@@ -121,7 +130,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
     final alarmProvider = Provider.of<AlarmProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.baseBlack, // Fallback bg
+      backgroundColor: const Color(0xFF2E2E3E), // Corrected bg color
       body: SafeArea(
         child: Column(
           children: [

@@ -1,127 +1,207 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-// ignore: unused_import
-import '../models/alarm_history.dart';
-import '../providers/history_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/design_system_buttons.dart';
+import '../widgets/gallery_detail_popup.dart';
 
-class GalleryScreen extends StatelessWidget {
+class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // HistoryProvider 구독
-    final historyProvider = Provider.of<HistoryProvider>(context);
-    final historyList = historyProvider.historyList;
+  State<GalleryScreen> createState() => _GalleryScreenState();
+}
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("나만의 갤러리")),
-      body: historyList.isEmpty
-          ? const Center(
-              child: Text("아직 수집된 기상 기록이 없습니다.\n알람을 해제하여 기록을 모아보세요!"),
-            )
-          : GridView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: historyList.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2열 그리드
-                childAspectRatio: 0.75, // 카드 비율
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemBuilder: (context, index) {
-                final item = historyList[index];
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // 1. 캐릭터 아이콘
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Color(
-                              item.characterColorValue,
-                            ).withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Color(item.characterColorValue),
-                              width: 3,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Color(item.characterColorValue),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // 2. 캐릭터 이름
-                        Text(
-                          item.characterName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        // 3. 점수 Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getScoreColor(item.score),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            "${item.score}점",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        // 4. 날짜/시간
-                        Text(
-                          DateFormat('MM/dd HH:mm').format(item.timestamp),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+class GalleryItem {
+  final String imagePath;
+  final int score;
+  final DateTime timestamp;
+
+  GalleryItem({
+    required this.imagePath,
+    required this.score,
+    required this.timestamp,
+  });
+}
+
+class _GalleryScreenState extends State<GalleryScreen> {
+  // Dummy data with Score and Timestamp for sorting
+  late List<GalleryItem> _items;
+  bool _isSortByScore = false; // Default: Latest (false)
+
+  @override
+  void initState() {
+    super.initState();
+    _items = [
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-pepe.png',
+        score: 1,
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-math.png',
+        score: 5,
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-shake.png',
+        score: 3,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-write.png',
+        score: 5,
+        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-colors.png',
+        score: 2,
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-sound.png',
+        score: 4,
+        timestamp: DateTime.now().subtract(const Duration(days: 0, hours: 5)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-record.png',
+        score: 5,
+        timestamp: DateTime.now(),
+      ), // Just now
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-gallery.png',
+        score: 3,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-list.png',
+        score: 1,
+        timestamp: DateTime.now().subtract(const Duration(days: 3)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-alarm.png',
+        score: 4,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 50)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-questionmark.png',
+        score: 5,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+      ),
+      GalleryItem(
+        imagePath: 'assets/illusts/illust-pepe.png',
+        score: 2,
+        timestamp: DateTime.now().subtract(const Duration(hours: 10)),
+      ),
+    ];
+    _sortItems();
+  }
+
+  void _sortItems() {
+    setState(() {
+      if (_isSortByScore) {
+        // Sort by Score (Desc) then Time (Desc)
+        _items.sort((a, b) {
+          int scoreComp = b.score.compareTo(a.score);
+          if (scoreComp != 0) return scoreComp;
+          return b.timestamp.compareTo(a.timestamp);
+        });
+      } else {
+        // Sort by Time (Desc)
+        _items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      }
+    });
+  }
+
+  void _onSortPressed() {
+    _isSortByScore = !_isSortByScore;
+    _sortItems();
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 15),
+      decoration: const BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        border: Border(bottom: BorderSide(color: Color(0xFF6E6E7E), width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 4,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'MY 기상 갤러리',
+            style: TextStyle(
+              color: AppColors.baseWhite,
+              fontSize: 22,
+              fontFamily: 'HYcysM',
             ),
+          ),
+          const SizedBox(height: 15),
+          Align(
+            alignment: Alignment.centerRight,
+            child: BlackSubButton(
+              label: _isSortByScore ? '점수순' : '최신순',
+              width: 80,
+              height: 32,
+              onTap: _onSortPressed,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Color _getScoreColor(int score) {
-    switch (score) {
-      case 1:
-        return AppColors.scoreWorst;
-      case 2:
-        return AppColors.scoreBad;
-      case 3:
-        return AppColors.scoreNormal;
-      case 4:
-        return AppColors.scoreGood;
-      case 5:
-        return AppColors.scorePerfect;
-      default:
-        return AppColors.lightGray;
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2E2E3E),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: _items.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // 3 columns
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  childAspectRatio: 1.0, // Square
+                ),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => GalleryDetailPopup(item: _items[index]),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        border: Border.all(
+                          color: const Color(0xFF2E2E3E),
+                          width: 2,
+                        ),
+                        image: DecorationImage(
+                          image: AssetImage(_items[index].imagePath),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

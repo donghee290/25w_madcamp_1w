@@ -5,6 +5,8 @@ import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
 import 'design_system_buttons.dart';
 import 'package:bullshit/widgets/recording_overlay.dart';
+import 'package:audioplayers/audioplayers.dart';
+// import 'dart:io'; // Removed unused import
 
 class SoundSelectionPopup extends StatefulWidget {
   final String initialSound;
@@ -25,6 +27,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   late double _volume;
   ui.Image? _sliderThumbImage;
   String? _customRecordingPath;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   final List<String> _soundOptions = [
     "엘지 굿모닝송",
@@ -51,6 +54,12 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     _loadSliderThumbImage();
   }
 
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadSliderThumbImage() async {
     try {
       final ByteData data = await rootBundle.load('assets/illusts/illust-controller.png');
@@ -66,6 +75,48 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     }
   }
 
+  final Map<String, String> _soundFileMap = {
+    "엘지 굿모닝송": "lg_morning.mp3",
+    "일어나셔야 합니다": "wake_up_plz.mp3",
+    "군대 기상 나팔": "army_trumpet.mp3",
+    "이성을 끌어당기는 주파수": "attract_love.mp3",
+    "성적이 오르는 주파수": "grade_up.mp3",
+    "일어나는 건 박수받아 마땅함": "clap_wakeup.mp3",
+  };
+
+  void _showError(String message) {
+     if (!mounted) return;
+     ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
+     );
+  }
+
+  Future<void> _playSound(String soundName) async {
+    try {
+      await _audioPlayer.stop();
+      
+      if (soundName == "직접 녹음하기") {
+        if (_customRecordingPath != null) {
+          // DeviceFileSource needs string path
+          await _audioPlayer.play(DeviceFileSource(_customRecordingPath!));
+        }
+      } else {
+         // Map to asset file
+         final fileName = _soundFileMap[soundName];
+         if (fileName != null) {
+           // Users need to put files in assets/sounds/
+           await _audioPlayer.play(AssetSource("sounds/$fileName"));
+         } else {
+           debugPrint("No file mapped for: $soundName");
+         }
+      }
+    } catch (e) {
+      debugPrint("Error playing sound: $e");
+      // Optional: silent fail or toast
+      // _showError("사운드 파일을 찾을 수 없습니다.");
+    }
+  }
+
   void _showRecordingOverlay() {
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -78,6 +129,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
               _customRecordingPath = path;
               _selectedSound = "직접 녹음하기";
             });
+            _playSound("직접 녹음하기");
           },
         ),
       ),
@@ -139,6 +191,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                           _selectedSound = sound;
                           _customRecordingPath = null;
                         });
+                        _playSound(sound);
                       }
                     },
                     child: Column(
@@ -166,15 +219,15 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                         ),
                         if (isSelected) ...[
                            Container(
-                              color: const Color(0xFF396DA9).withValues(alpha: 0.5), 
+                              color: const Color(0xFF396DA9).withOpacity(0.5), 
                               height: 1, 
                               margin: const EdgeInsets.symmetric(vertical: 5),
                             ),
-                            SizedBox(
-                              height: 40,
-                              child: _buildSlider(),
-                            ),
-                            const SizedBox(height: 5),
+                             SizedBox(
+                               height: 40,
+                               child: _buildSlider(),
+                             ),
+                             const SizedBox(height: 5),
                         ],
                       ],
                     ),
