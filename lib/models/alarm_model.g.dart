@@ -84,27 +84,32 @@ class MissionTypeAdapter extends TypeAdapter<MissionType> {
   MissionType read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return MissionType.shake;
-      case 1:
         return MissionType.math;
+      case 1:
+        return MissionType.colors;
       case 2:
-        return MissionType.none;
-      default:
+        return MissionType.write;
+      case 3:
         return MissionType.shake;
+      default:
+        return MissionType.math;
     }
   }
 
   @override
   void write(BinaryWriter writer, MissionType obj) {
     switch (obj) {
-      case MissionType.shake:
+      case MissionType.math:
         writer.writeByte(0);
         break;
-      case MissionType.math:
+      case MissionType.colors:
         writer.writeByte(1);
         break;
-      case MissionType.none:
+      case MissionType.write:
         writer.writeByte(2);
+        break;
+      case MissionType.shake:
+        writer.writeByte(3);
         break;
     }
   }

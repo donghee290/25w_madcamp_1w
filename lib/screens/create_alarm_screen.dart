@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../widgets/design_system_buttons.dart';
 import '../widgets/custom_switch.dart';
 import '../widgets/sound_selection_popup.dart';
+import '../widgets/mission_selection_popup.dart';
 
 class CreateAlarmScreen extends StatefulWidget {
   final Alarm? alarm;
@@ -24,16 +25,20 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   // Time Selection
   int _selectedHour = 7;
   int _selectedMinute = 0;
-  bool _isAm = true; 
+  bool _isAm = true;
 
   final TextEditingController _labelController = TextEditingController();
-  List<int> _selectedWeekdays = []; 
+  List<int> _selectedWeekdays = [];
   bool _isOnce = false; // "한번만"
 
-  // Sound & Mission
+  //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
-  final String _missionName = "미션을 선택해주세요.";
+
+  String _missionName = "미션을 선택해주세요.";
+  MissionType _missionType = MissionType.math;
+  int _missionDifficulty = 1;
+  String? _missionPayload;
 
   // Settings
   bool _isVibration = true;
@@ -42,6 +47,23 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   int _snoozeCount = 1; // 1, 2, 3 (times)
 
   ui.Image? _sliderThumbImage;
+
+  String _missionTitleOf(MissionType type) {
+    switch (type) {
+      case MissionType.math:
+        return "수학 문제";
+      case MissionType.colors:
+        return "색깔 타일 찾기";
+      case MissionType.write:
+        return "따라쓰기";
+      case MissionType.shake:
+        return "흔들기";
+    }
+  }
+
+  String _missionIconOf(MissionType type) {
+    return "assets/illusts/illust-${type.name}.png";
+  }
 
   @override
   void initState() {
@@ -55,6 +77,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       _isVibration = a.isVibration;
       _duration = a.duration;
       _snoozeCount = a.snoozeCount;
+
+      _missionType = a.missionType;
+      _missionDifficulty = a.missionDifficulty;
+      _missionName = _missionTitleOf(_missionType);
+
       // Time Logic
       // Convert 24h to 12h
       if (a.hour >= 12) {
@@ -65,7 +92,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         _selectedHour = a.hour == 0 ? 12 : a.hour;
       }
       _selectedMinute = a.minute;
-      
+
       if (_selectedWeekdays.isEmpty) {
         _isOnce = true;
       }
@@ -73,7 +100,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       // Default: Current System Time
       final now = DateTime.now();
       int currentHour = now.hour;
-      
+
       if (currentHour >= 12) {
         _isAm = false;
         _selectedHour = currentHour == 12 ? 12 : currentHour - 12;
@@ -82,17 +109,21 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         _selectedHour = currentHour == 0 ? 12 : currentHour;
       }
       _selectedMinute = now.minute;
-      
+
       // Default Weekdays: Empty implies "Once" logic
-      _selectedWeekdays = []; 
+      _selectedWeekdays = [];
       _isOnce = true;
     }
   }
 
   Future<void> _loadSliderThumbImage() async {
     try {
-      final ByteData data = await rootBundle.load('assets/illusts/illust-controller.png');
-      final ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final ByteData data = await rootBundle.load(
+        'assets/illusts/illust-controller.png',
+      );
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+      );
       final ui.FrameInfo fi = await codec.getNextFrame();
       if (mounted) {
         setState(() {
@@ -120,7 +151,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     } else {
       if (_selectedHour != 12) hour24 = _selectedHour + 12;
     }
-    
+
     // If "Once" is checked, finalWeekdays is empty.
     final finalWeekdays = _isOnce ? <int>[] : _selectedWeekdays;
 
@@ -135,8 +166,12 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       weekdays: finalWeekdays,
       isVibration: _isVibration,
       duration: _duration,
-      snoozeCount: _isSnoozeOn ? _snoozeCount : 0, 
-      payload: _soundName, // Storing sound path in payload for now as requested or typical pattern
+      snoozeCount: _isSnoozeOn ? _snoozeCount : 0,
+
+      missionType: _missionType,
+      missionDifficulty: _missionDifficulty,
+
+      soundFileName: _soundName,
     );
 
     if (widget.alarm != null) {
@@ -154,12 +189,12 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       width: double.infinity,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 20),
-      color: Colors.transparent, 
+      color: Colors.transparent,
       child: const Text(
         "기상 생성하기",
         style: TextStyle(
           fontFamily: 'HYcysM',
-          fontSize: 22, 
+          fontSize: 22,
           color: AppColors.baseWhite,
         ),
       ),
@@ -172,7 +207,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     const textStyle = TextStyle(
       fontFamily: 'HYcysM',
       color: AppColors.baseWhite,
-      fontSize: 32, 
+      fontSize: 32,
     );
     const amPmStyle = TextStyle(
       fontFamily: 'HYcysM',
@@ -191,11 +226,17 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             width: 70,
             child: CupertinoPicker(
               itemExtent: 50,
-              scrollController: FixedExtentScrollController(initialItem: _selectedHour - 1),
+              scrollController: FixedExtentScrollController(
+                initialItem: _selectedHour - 1,
+              ),
               onSelectedItemChanged: (idx) {
                 setState(() => _selectedHour = idx + 1);
               },
-              children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: textStyle))),
+              children: List.generate(
+                12,
+                (index) =>
+                    Center(child: Text("${index + 1}", style: textStyle)),
+              ),
             ),
           ),
           // Minute
@@ -203,11 +244,21 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             width: 70,
             child: CupertinoPicker(
               itemExtent: 50,
-              scrollController: FixedExtentScrollController(initialItem: _selectedMinute),
+              scrollController: FixedExtentScrollController(
+                initialItem: _selectedMinute,
+              ),
               onSelectedItemChanged: (idx) {
                 setState(() => _selectedMinute = idx);
               },
-              children: List.generate(60, (index) => Center(child: Text(index.toString().padLeft(2, '0'), style: textStyle))),
+              children: List.generate(
+                60,
+                (index) => Center(
+                  child: Text(
+                    index.toString().padLeft(2, '0'),
+                    style: textStyle,
+                  ),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 20),
@@ -216,7 +267,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             width: 70,
             child: CupertinoPicker(
               itemExtent: 50,
-              scrollController: FixedExtentScrollController(initialItem: _isAm ? 0 : 1),
+              scrollController: FixedExtentScrollController(
+                initialItem: _isAm ? 0 : 1,
+              ),
               onSelectedItemChanged: (idx) {
                 setState(() => _isAm = idx == 0);
               },
@@ -240,7 +293,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           onTap: () {
             setState(() {
               _isOnce = !_isOnce;
-              // If we re-check 'Once', maybe clear weekdays? 
+              // If we re-check 'Once', maybe clear weekdays?
               // Or keep them but treat as empty? Logic handles it.
               // If we uncheck 'Once', keep selected or what?
               // User requirement: Default is empty.
@@ -248,19 +301,37 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           },
           child: Row(
             children: [
-               // Custom Checkbox
-               Container(
-                 width: 24, height: 24,
-                 margin: const EdgeInsets.only(right: 10),
-                 decoration: BoxDecoration(
-                   border: Border.all(color: const Color(0xFFD9D9D9), width: 1.5),
-                   color: _isOnce ? const Color(0xFF404040) : Colors.transparent, // Fill with dark grey if checked like img
-                 ),
-                 child: _isOnce 
-                   ? const Icon(Icons.check, size: 20, color: Color(0xFFD9D9D9)) 
-                   : null, 
-               ),
-               const Text("한번만", style: TextStyle(color: Color(0xFFD9D9D9), fontFamily: 'HYkanM', fontSize: 14)),
+              // Custom Checkbox
+              Container(
+                width: 24,
+                height: 24,
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFFD9D9D9),
+                    width: 1.5,
+                  ),
+                  color: _isOnce
+                      ? const Color(0xFF404040)
+                      : Colors
+                            .transparent, // Fill with dark grey if checked like img
+                ),
+                child: _isOnce
+                    ? const Icon(
+                        Icons.check,
+                        size: 20,
+                        color: Color(0xFFD9D9D9),
+                      )
+                    : null,
+              ),
+              const Text(
+                "한번만",
+                style: TextStyle(
+                  color: Color(0xFFD9D9D9),
+                  fontFamily: 'HYkanM',
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),
@@ -268,39 +339,51 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         // Weekdays
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: ["일", "월", "화", "수", "목", "금", "토"].asMap().entries.map((entry) {
+          children: ["일", "월", "화", "수", "목", "금", "토"].asMap().entries.map((
+            entry,
+          ) {
             final idx = entry.key;
             final label = entry.value;
             // logic: Sunday=7, Mon=1...Sat=6?
             // Existing logic: index 0(Sun) -> 7.
             final int weekdayId = (idx == 0) ? 7 : idx;
-            
-            final isSelected = !_isOnce && _selectedWeekdays.contains(weekdayId);
-            
+
+            final isSelected =
+                !_isOnce && _selectedWeekdays.contains(weekdayId);
+
             return GestureDetector(
-              onTap: _isOnce ? null : () {
-                setState(() {
-                   if (isSelected) {
-                     _selectedWeekdays.remove(weekdayId);
-                   } else {
-                     _selectedWeekdays.add(weekdayId);
-                   }
-                });
-              },
+              onTap: _isOnce
+                  ? null
+                  : () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedWeekdays.remove(weekdayId);
+                        } else {
+                          _selectedWeekdays.add(weekdayId);
+                        }
+                      });
+                    },
               child: Opacity(
                 opacity: _isOnce ? 0.3 : 1.0,
                 child: Container(
-                  width: 40, height: 40,
+                  width: 40,
+                  height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.baseYellow : const Color(0xFF3E3E4E), // Dark Gray
+                    color: isSelected
+                        ? AppColors.baseYellow
+                        : const Color(0xFF3E3E4E), // Dark Gray
                     borderRadius: BorderRadius.circular(5),
-                    border: isSelected ? null : Border.all(color: const Color(0xFF6E6E7E)),
+                    border: isSelected
+                        ? null
+                        : Border.all(color: const Color(0xFF6E6E7E)),
                   ),
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: isSelected ? AppColors.baseBlue : const Color(0xFFD9D9D9),
+                      color: isSelected
+                          ? AppColors.baseBlue
+                          : const Color(0xFFD9D9D9),
                       fontFamily: 'HYkanB',
                       fontSize: 14,
                     ),
@@ -314,18 +397,38 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     );
   }
 
-  Widget _buildBlueBox(String title, String content, String iconPath, {VoidCallback? onTap}) {
+  Widget _buildBlueBox(
+    String title,
+    String content,
+    String iconPath, {
+    VoidCallback? onTap,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: const TextStyle(color: AppColors.baseWhite, fontSize: 14, fontFamily: 'HYkanM')),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.baseWhite,
+                fontSize: 14,
+                fontFamily: 'HYkanM',
+              ),
+            ),
             GestureDetector(
-               onTap: onTap,
-               child: const Text("설정하러 가기", style: TextStyle(color: AppColors.baseWhite, fontSize: 10, decoration: TextDecoration.underline, fontFamily: 'HYkanM')),
-            )
+              onTap: onTap,
+              child: const Text(
+                "설정하러 가기",
+                style: TextStyle(
+                  color: AppColors.baseWhite,
+                  fontSize: 10,
+                  decoration: TextDecoration.underline,
+                  fontFamily: 'HYkanM',
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -335,7 +438,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           decoration: BoxDecoration(
             gradient: AppColors.gradSkyblue,
             borderRadius: BorderRadius.circular(0), // Sharp rect
-            border: Border.all(color: const Color(0xFF396DA9), width: 2), 
+            border: Border.all(color: const Color(0xFF396DA9), width: 2),
           ),
           child: Row(
             children: [
@@ -347,7 +450,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 child: Text(
                   content,
                   style: const TextStyle(
-                    color: Color(0xFF5882B4), 
+                    color: Color(0xFF5882B4),
                     fontSize: 16,
                     fontFamily: 'HYkanB',
                   ),
@@ -368,23 +471,24 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       alignment: Alignment.center,
       children: [
         Container(
-           height: 30,
-           width: double.infinity,
-           decoration: BoxDecoration(
-             gradient: const LinearGradient(
-               begin: Alignment.topCenter, end: Alignment.bottomCenter,
-               colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)]
-             ),
-             borderRadius: BorderRadius.circular(15),
-             border: Border.all(color: const Color(0xFF6E6E7E)),
-           ),
+          height: 30,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
+            ),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: const Color(0xFF6E6E7E)),
+          ),
         ),
         SliderTheme(
           data: SliderThemeData(
             trackHeight: 2,
-            activeTrackColor: Colors.transparent, 
+            activeTrackColor: Colors.transparent,
             inactiveTrackColor: Colors.transparent,
-            thumbShape: _CustomThumbShape(image: _sliderThumbImage), 
+            thumbShape: _CustomThumbShape(image: _sliderThumbImage),
             overlayShape: SliderComponentShape.noOverlay,
           ),
           child: Slider(
@@ -400,15 +504,32 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("커스텀 설정", style: TextStyle(color: AppColors.baseWhite, fontSize: 14, fontFamily: 'HYkanM')),
+        const Text(
+          "커스텀 설정",
+          style: TextStyle(
+            color: AppColors.baseWhite,
+            fontSize: 14,
+            fontFamily: 'HYkanM',
+          ),
+        ),
         const SizedBox(height: 15),
-        
+
         // Vibration
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("진동 울리기", style: TextStyle(color: AppColors.baseWhite, fontSize: 12, fontFamily: 'HYkanM')),
-            CustomSwitch(value: _isVibration, onChanged: (v) => setState(() => _isVibration = v)),
+            const Text(
+              "진동 울리기",
+              style: TextStyle(
+                color: AppColors.baseWhite,
+                fontSize: 12,
+                fontFamily: 'HYkanM',
+              ),
+            ),
+            CustomSwitch(
+              value: _isVibration,
+              onChanged: (v) => setState(() => _isVibration = v),
+            ),
           ],
         ),
         const SizedBox(height: 15),
@@ -417,14 +538,36 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("알람 지속시간", style: TextStyle(color: AppColors.baseWhite, fontSize: 12, fontFamily: 'HYkanM')),
-            Text("$_duration분", style: const TextStyle(color: AppColors.baseYellow, fontSize: 12, fontFamily: 'HYkanB')),
+            const Text(
+              "알람 지속시간",
+              style: TextStyle(
+                color: AppColors.baseWhite,
+                fontSize: 12,
+                fontFamily: 'HYkanM',
+              ),
+            ),
+            Text(
+              "$_duration분",
+              style: const TextStyle(
+                color: AppColors.baseYellow,
+                fontSize: 12,
+                fontFamily: 'HYkanB',
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [1, 3, 5].map((d) => _buildSelectButton("$d분", _duration == d, () => setState(() => _duration = d))).toList(),
+          children: [1, 3, 5]
+              .map(
+                (d) => _buildSelectButton(
+                  "$d분",
+                  _duration == d,
+                  () => setState(() => _duration = d),
+                ),
+              )
+              .toList(),
         ),
         const SizedBox(height: 15),
 
@@ -432,8 +575,18 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("알람 미루기", style: TextStyle(color: AppColors.baseWhite, fontSize: 12, fontFamily: 'HYkanM')),
-            CustomSwitch(value: _isSnoozeOn, onChanged: (v) => setState(() => _isSnoozeOn = v)),
+            const Text(
+              "알람 미루기",
+              style: TextStyle(
+                color: AppColors.baseWhite,
+                fontSize: 12,
+                fontFamily: 'HYkanM',
+              ),
+            ),
+            CustomSwitch(
+              value: _isSnoozeOn,
+              onChanged: (v) => setState(() => _isSnoozeOn = v),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -441,7 +594,15 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           opacity: _isSnoozeOn ? 1.0 : 0.3,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [1, 2, 3].map((c) => _buildSelectButton("$c회", _snoozeCount == c, () => setState(() => _snoozeCount = c))).toList(),
+            children: [1, 2, 3]
+                .map(
+                  (c) => _buildSelectButton(
+                    "$c회",
+                    _snoozeCount == c,
+                    () => setState(() => _snoozeCount = c),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],
@@ -459,14 +620,18 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF3E3E4E),
             borderRadius: BorderRadius.circular(5),
-             boxShadow: isSelected ? [
-                 // Optional specific shadow style if needed
-            ] : [],
+            boxShadow: isSelected
+                ? [
+                    // Optional specific shadow style if needed
+                  ]
+                : [],
           ),
           child: Text(
             text,
             style: TextStyle(
-              color: isSelected ? AppColors.baseYellow : const Color(0xFFD9D9D9),
+              color: isSelected
+                  ? AppColors.baseYellow
+                  : const Color(0xFFD9D9D9),
               fontFamily: isSelected ? 'HYkanB' : 'HYkanM',
               fontSize: 12,
             ),
@@ -475,7 +640,6 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -492,13 +656,17 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: AppColors.baseWhite, size: 20),
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.baseWhite,
+                      size: 20,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
               ],
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -506,67 +674,119 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Label Input
-                    const Text("기상 이름", style: TextStyle(color: AppColors.baseWhite, fontSize: 12, fontFamily: 'HYkanM')),
+                    const Text(
+                      "기상 이름",
+                      style: TextStyle(
+                        color: AppColors.baseWhite,
+                        fontSize: 12,
+                        fontFamily: 'HYkanM',
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Container(
                       height: 40,
                       decoration: BoxDecoration(
                         color: AppColors.baseWhite,
                         borderRadius: BorderRadius.circular(5),
-                         boxShadow: const [BoxShadow(color: AppColors.shadowColor, blurRadius: 2, offset: Offset(0, 2))],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppColors.shadowColor,
+                            blurRadius: 2,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: TextField(
                         controller: _labelController,
-                        style: const TextStyle(color: Colors.black, fontFamily: 'HYkanM'),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'HYkanM',
+                        ),
                         decoration: const InputDecoration(
                           hintText: "기상명을 입력해주세요.",
                           hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Text("기상 시간", style: TextStyle(color: AppColors.baseWhite, fontSize: 12, fontFamily: 'HYkanM')),
-                    
+                    const Text(
+                      "기상 시간",
+                      style: TextStyle(
+                        color: AppColors.baseWhite,
+                        fontSize: 12,
+                        fontFamily: 'HYkanM',
+                      ),
+                    ),
+
                     _buildTimePicker(),
 
                     _buildWeekdaySection(),
-                    
+
                     const SizedBox(height: 25),
-                    
+
                     _buildBlueBox(
-                      "기상 사운드", 
+                      "기상 사운드",
                       // FIX: Display conditional logic for sound name
-                      (_soundName.contains('/') || _soundName.contains(Platform.pathSeparator))
-                          ? "직접 녹음하기" 
-                          : _soundName, 
+                      (_soundName.contains('/') ||
+                              _soundName.contains(Platform.pathSeparator))
+                          ? "직접 녹음하기"
+                          : _soundName,
                       "assets/illusts/illust-sound.png",
                       onTap: () async {
-                         final result = await showModalBottomSheet(
-                           context: context,
-                           backgroundColor: Colors.transparent,
-                           isScrollControlled: true,
-                           builder: (context) => SoundSelectionPopup(
-                             initialSound: _soundName,
-                             initialVolume: _volume,
-                           ),
-                         );
-                         
-                         if (result != null && result is Map) {
-                           setState(() {
-                             _soundName = result['soundName'];
-                             _volume = result['volume'];
-                           });
-                         }
+                        final result = await showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          builder: (context) => SoundSelectionPopup(
+                            initialSound: _soundName,
+                            initialVolume: _volume,
+                          ),
+                        );
+
+                        if (result != null && result is Map) {
+                          setState(() {
+                            _soundName = result['soundName'];
+                            _volume = result['volume'];
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 5),
                     _buildSlider(),
-                    
+
                     const SizedBox(height: 15),
-                    _buildBlueBox("기상 미션", _missionName, "assets/illusts/illust-questionmark.png"),
-                    
+                    _buildBlueBox(
+                      "기상 미션",
+                      _missionName,
+                      _missionIconOf(_missionType),
+                      onTap: () async {
+                        final result = await showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          builder: (context) => MissionSelectionPopup(
+                            initialType: _missionType,
+                            initialPayload: _missionPayload,
+                            initialDifficulty: _missionDifficulty,
+                          ),
+                        );
+
+                        if (result != null && result is Map) {
+                          setState(() {
+                            _missionType = result['missionType'] as MissionType;
+                            _missionDifficulty =
+                                result['missionDifficulty'] as int;
+                            _missionName = result['missionName'] as String;
+                          });
+                        }
+                      },
+                    ),
+
                     const SizedBox(height: 25),
                     _buildCustomSettings(),
 
@@ -591,9 +811,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
 class _CustomThumbShape extends SliderComponentShape {
   final ui.Image? image;
-  
+
   _CustomThumbShape({this.image});
-  
+
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(40, 40);
 
@@ -620,12 +840,17 @@ class _CustomThumbShape extends SliderComponentShape {
     }
 
     final Canvas canvas = context.canvas;
-    
+
     // Draw image centered at 'center'
     // Target size for thumb: 36x36
     final dst = Rect.fromCenter(center: center, width: 36, height: 36);
-    final src = Rect.fromLTWH(0, 0, image!.width.toDouble(), image!.height.toDouble());
-    
+    final src = Rect.fromLTWH(
+      0,
+      0,
+      image!.width.toDouble(),
+      image!.height.toDouble(),
+    );
+
     canvas.drawImageRect(image!, src, dst, Paint());
   }
 }
