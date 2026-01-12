@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:bullshit/theme/app_colors.dart';
 import 'package:bullshit/services/permission_service.dart';
-import 'package:bullshit/screens/feat1_first_alarm/first_alarm_step1_screen.dart';
 
 class PermissionSettingsPopupScreen extends StatelessWidget {
   const PermissionSettingsPopupScreen({super.key});
@@ -25,9 +24,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: ColoredBox(color: Colors.black.withOpacity(0.75)),
-          ),
+          Positioned.fill(child: ColoredBox(color: AppColors.transparentBlack)),
           Center(
             child: Container(
               width: 320,
@@ -36,11 +33,11 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                 color: AppColors.baseGray,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: AppColors.baseWhite, width: 2),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     blurRadius: 8,
                     offset: Offset(0, 3),
-                    color: Color(0x66000000),
+                    color: AppColors.transparentBlack,
                   ),
                 ],
               ),
@@ -56,6 +53,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                     '※ 권한을 허용하지 않으면 서비스를 이용할 수 없어요.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontFamily: 'HYkanM',
                       color: AppColors.lightGray,
                       fontSize: 11,
                       height: 1.2,
@@ -67,17 +65,30 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                       Expanded(
                         child: SizedBox(
                           height: 40,
-                          child: ElevatedButton(
-                            onPressed: () => SystemNavigator.pop(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.lightGray,
-                              foregroundColor: AppColors.baseBlack,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            elevation: 2,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              onTap: () => SystemNavigator.pop(),
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.gradWhite,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '나중에',
+                                    style: TextStyle(
+                                      fontFamily: 'HYkanM',
+                                      fontSize: 14,
+                                      color: AppColors.baseBlack,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                            child: const Text('나중에'),
                           ),
                         ),
                       ),
@@ -85,28 +96,38 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                       Expanded(
                         child: SizedBox(
                           height: 40,
-                          child: ElevatedButton(
-                            onPressed: service.isRequesting
-                                ? null
-                                : () async {
-                                    final ok = await context
-                                        .read<PermissionService>()
-                                        .requestAllInOrder();
-                                    if (!context.mounted) return;
-
-                                    if (ok) {
-                                      Navigator.of(context).pop(true);
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.baseYellow,
-                              foregroundColor: AppColors.baseBlack,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            elevation: 2,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              onTap: service.isRequesting
+                                  ? null
+                                  : () async {
+                                      final ok = await context
+                                          .read<PermissionService>()
+                                          .requestAllInOrder();
+                                      if (!context.mounted) return;
+                                      if (ok) Navigator.of(context).pop(true);
+                                    },
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.secondaryGradient,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '네!',
+                                    style: TextStyle(
+                                      fontFamily: 'HYkanB',
+                                      fontSize: 14,
+                                      color: AppColors.baseBlue,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                            child: const Text('네!'),
                           ),
                         ),
                       ),
@@ -127,6 +148,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
       textAlign: TextAlign.center,
       text: TextSpan(
         style: const TextStyle(
+          fontFamily: 'HYcryM',
           color: AppColors.baseWhite,
           fontSize: 16,
           height: 1.35,
@@ -135,7 +157,10 @@ class _PermissionSettingsPopupView extends StatelessWidget {
           TextSpan(text: parts.first),
           TextSpan(
             text: highlight,
-            style: const TextStyle(color: AppColors.baseRed),
+            style: const TextStyle(
+              fontFamily: 'HYcryM',
+              color: AppColors.baseRed,
+            ),
           ),
           if (parts.length > 1) TextSpan(text: parts.sublist(1).join()),
         ],
