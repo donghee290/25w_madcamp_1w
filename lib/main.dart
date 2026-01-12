@@ -7,7 +7,9 @@ import 'services/notification_service.dart';
 import 'screens/alarm_result_screen.dart';
 import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
-import 'screens/main_screen.dart'; // Imported MainScreen
+import 'screens/main_screen.dart';
+import 'screens/feat1_first_alarm/intro_screen.dart';
+import 'package:bullshit/theme/app_colors.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -24,14 +26,13 @@ void main() async {
 
   await Hive.openBox<Alarm>('alarmBox');
   await Hive.openBox<AlarmHistory>('historyBox');
+  await Hive.openBox('appBox');
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AlarmProvider()),
-        ChangeNotifierProvider(
-          create: (_) => HistoryProvider(),
-        ), // HistoryProvider 추가
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
       ],
       child: const MyApp(),
     ),
@@ -82,13 +83,37 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF2E2E3E),
+        scaffoldBackgroundColor: AppColors.baseGray,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF2E2E3E),
           elevation: 0,
+          backgroundColor: AppColors.baseRed,
         ),
       ),
-      home: const MainScreen(), // 메인 스크린 분리
+      home: const _EntryGate(),
     );
+  }
+}
+
+class _EntryGate extends StatefulWidget {
+  const _EntryGate();
+
+  @override
+  State<_EntryGate> createState() => _EntryGateState();
+}
+
+class _EntryGateState extends State<_EntryGate> {
+  late final bool _hasSeenIntro;
+
+  @override
+  void initState() {
+    super.initState();
+    final box = Hive.box('appBox');
+    _hasSeenIntro = box.get('hasSeenIntro', defaultValue: false) as bool;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasSeenIntro) return const MainScreen();
+    return const IntroScreen();
   }
 }
