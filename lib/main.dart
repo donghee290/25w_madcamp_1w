@@ -3,11 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/alarm_model.dart';
 import 'providers/alarm_provider.dart';
+import 'providers/next_alarm_provider.dart';
 import 'services/notification_service.dart';
 import 'screens/alarm_result_screen.dart';
 import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
-import 'screens/main_screen.dart'; // Imported MainScreen
+import 'screens/main_screen.dart';
 import 'theme/app_theme.dart';
 import 'screens/feat1_first_alarm/intro_screen.dart';
 
@@ -32,6 +33,15 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AlarmProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+
+        ChangeNotifierProxyProvider<AlarmProvider, NextAlarmProvider>(
+          create: (_) => NextAlarmProvider(),
+          update: (_, alarmProvider, nextProvider) {
+            nextProvider ??= NextAlarmProvider();
+            nextProvider.setAlarmProvider(alarmProvider);
+            return nextProvider;
+          },
+        ),
       ],
       child: const MyApp(),
     ),

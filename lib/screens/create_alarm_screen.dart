@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../widgets/design_system_buttons.dart';
 import '../widgets/custom_switch.dart';
 import '../widgets/sound_selection_popup.dart';
+import '../widgets/mission_selection_popup.dart';
 
 class CreateAlarmScreen extends StatefulWidget {
   final Alarm? alarm;
@@ -30,10 +31,14 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   List<int> _selectedWeekdays = [];
   bool _isOnce = false; // "한번만"
 
-  // Sound & Mission
+  //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
-  final String _missionName = "미션을 선택해주세요.";
+
+  String _missionName = "미션을 선택해주세요.";
+  MissionType _missionType = MissionType.math;
+  int _missionDifficulty = 1;
+  String? _missionPayload;
 
   // Settings
   bool _isVibration = true;
@@ -42,6 +47,23 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   int _snoozeCount = 1; // 1, 2, 3 (times)
 
   ui.Image? _sliderThumbImage;
+
+  String _missionTitleOf(MissionType type) {
+    switch (type) {
+      case MissionType.math:
+        return "수학 문제";
+      case MissionType.colors:
+        return "색깔 타일 찾기";
+      case MissionType.write:
+        return "따라쓰기";
+      case MissionType.shake:
+        return "흔들기";
+    }
+  }
+
+  String _missionIconOf(MissionType type) {
+    return "assets/illusts/illust-${type.name}.png";
+  }
 
   @override
   void initState() {
@@ -55,6 +77,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       _isVibration = a.isVibration;
       _duration = a.duration;
       _snoozeCount = a.snoozeCount;
+
+      _missionType = a.missionType;
+      _missionDifficulty = a.missionDifficulty;
+      _missionName = _missionTitleOf(_missionType);
+
       // Time Logic
       // Convert 24h to 12h
       if (a.hour >= 12) {
@@ -140,8 +167,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       isVibration: _isVibration,
       duration: _duration,
       snoozeCount: _isSnoozeOn ? _snoozeCount : 0,
-      payload:
-          _soundName, // Storing sound path in payload for now as requested or typical pattern
+      missionType: _missionType,
+      missionDifficulty: _missionDifficulty,
+      soundFileName: _soundName,
     );
 
     if (widget.alarm != null) {
@@ -733,7 +761,28 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     _buildBlueBox(
                       "기상 미션",
                       _missionName,
-                      "assets/illusts/illust-questionmark.png",
+                      _missionIconOf(_missionType),
+                      onTap: () async {
+                        final result = await showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          builder: (context) => MissionSelectionPopup(
+                            initialType: _missionType,
+                            initialPayload: _missionPayload,
+                            initialDifficulty: _missionDifficulty,
+                          ),
+                        );
+
+                        if (result != null && result is Map) {
+                          setState(() {
+                            _missionType = result['missionType'] as MissionType;
+                            _missionDifficulty =
+                                result['missionDifficulty'] as int;
+                            _missionName = result['missionName'] as String;
+                          });
+                        }
+                      },
                     ),
 
                     const SizedBox(height: 25),

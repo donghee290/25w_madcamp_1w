@@ -21,6 +21,10 @@ class AlarmCard extends StatelessWidget {
     this.onSelectionChanged,
   });
 
+  String missionIconOf(MissionType type) {
+    return "assets/illusts/illust-${type.name}.png";
+  }
+
   Widget _buildDaysRow() {
     final days = ['일', '월', '화', '수', '목', '금', '토'];
     return Row(
@@ -204,7 +208,7 @@ class AlarmCard extends StatelessWidget {
                     children: [
                       // Illustration
                       Image.asset(
-                        'assets/illusts/illust-math.png', // Fallback
+                        missionIconOf(alarm.missionType),
                         width: 54,
                         height: 54,
                         fit: BoxFit.contain,
