@@ -22,7 +22,8 @@ class AlarmProvider extends ChangeNotifier {
   /// 중복 시간 확인 (활성화된 알람 기준)
   bool hasDuplicateAlarm(int hour, int minute) {
     return _alarmBox.values.any(
-      (alarm) => alarm.isEnabled && alarm.hour == hour && alarm.minute == minute,
+      (alarm) =>
+          alarm.isEnabled && alarm.hour == hour && alarm.minute == minute,
     );
   }
 
@@ -49,7 +50,7 @@ class AlarmProvider extends ChangeNotifier {
     await _alarmBox.put(updatedAlarm.id, updatedAlarm);
     notifyListeners();
 
-    // 1. 기존 알람 무조건 취소 (요일 변경 등이 있을 수 있으므로)
+    // 1. 기존 알람 취소
     await NotificationService().cancelAlarm(updatedAlarm.id.hashCode);
 
     // 2. 켜져있을 경우에만 재등록
@@ -60,14 +61,19 @@ class AlarmProvider extends ChangeNotifier {
 
   /// [Private Helper] 알람 등록 로직 단순화
   Future<void> _scheduleNotification(Alarm alarm) async {
+    // Payload format: alarm|id|hour|minute
+    final String notificationPayload =
+        "alarm|${alarm.id}|${alarm.hour}|${alarm.minute}";
+
     await NotificationService().scheduleAlarm(
       alarmId: alarm.id.hashCode,
       title: alarm.label.isEmpty ? "알람" : alarm.label,
       body: "기상 시간입니다!",
       hour: alarm.hour, // 시
       minute: alarm.minute, // 분
-      weekdays: alarm.weekdays, // 요일 리스트 (없으면 단발성)
-      duration: alarm.duration, // Snooze Interval
+      weekdays: alarm.weekdays, // 요일 리스트
+      payload: notificationPayload,
+      duration: alarm.duration,
     );
   }
 }

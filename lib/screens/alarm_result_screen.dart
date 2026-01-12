@@ -53,19 +53,19 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
     // MVP: 일단 같은 날로 가정하되, scheduledTime이 미래라면(=새벽 알람을 전날 밤에 껐거나 등) 하루 뺌
     if (scheduledTime.isAfter(dismissalTime)) {
       if (scheduledTime.difference(dismissalTime).inHours > 12) {
-         scheduledTime = scheduledTime.subtract(const Duration(days: 1));
+        scheduledTime = scheduledTime.subtract(const Duration(days: 1));
       }
     } else {
-        // scheduledTime이 dismissalTime보다 과거인 경우 (정상)
-        // 만약 차이가 너무 크다면(23시간 등) 어제 알람일 수 있으니 보정 필요할 수 있으나 생략
+      // scheduledTime이 dismissalTime보다 과거인 경우 (정상)
+      // 만약 차이가 너무 크다면(23시간 등) 어제 알람일 수 있으니 보정 필요할 수 있으나 생략
     }
 
     // 시간 차이 계산 (분 단위, 절대값)
     // 늦게 일어난 경우만 따지므로 dismissal - scheduled
     // 일찍 일어난 경우는 0분 지연으로 처리
     int diff = dismissalTime.difference(scheduledTime).inMinutes;
-    if (diff < 0) diff = 0; 
-    
+    if (diff < 0) diff = 0;
+
     diffMinutes = diff;
 
     // 점수 로직 (반대로 수정: 빨리 일어날수록 높은 점수)
@@ -95,7 +95,7 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
       Colors.blue,
       Colors.green,
       Colors.orange,
-      Colors.purple
+      Colors.purple,
     ];
     final names = ["파이리", "꼬부기", "이상해씨", "피카츄", "잠만보"];
 
@@ -128,17 +128,24 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
               const SizedBox(height: 10),
               Text(
                 "파트너: $characterName",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 30),
 
               // 2. 정보 표시
-              _buildInfoRow("기상 예정 시각",
-                  "${widget.scheduledHour.toString().padLeft(2, '0')}:${widget.scheduledMinute.toString().padLeft(2, '0')}"),
-              _buildInfoRow("실제 해제 시각",
-                  "${dismissalTime.hour.toString().padLeft(2, '0')}:${dismissalTime.minute.toString().padLeft(2, '0')}"),
+              _buildInfoRow(
+                "기상 예정 시각",
+                "${widget.scheduledHour.toString().padLeft(2, '0')}:${widget.scheduledMinute.toString().padLeft(2, '0')}",
+              ),
+              _buildInfoRow(
+                "실제 해제 시각",
+                "${dismissalTime.hour.toString().padLeft(2, '0')}:${dismissalTime.minute.toString().padLeft(2, '0')}",
+              ),
               _buildInfoRow("지연 시간", "$diffMinutes 분"),
-              
+
               const Divider(height: 40),
 
               // 3. 점수
@@ -170,15 +177,17 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
                     characterColorValue: characterColor.toARGB32(),
                   );
 
-                  await Provider.of<HistoryProvider>(context, listen: false)
-                      .addHistory(historyEntry);
+                  await Provider.of<HistoryProvider>(
+                    context,
+                    listen: false,
+                  ).addHistory(historyEntry);
 
                   if (context.mounted) {
                     Navigator.of(context).pop(); // 홈으로
                   }
                 },
                 child: const Text("확인 (갤러리에 저장)"),
-              )
+              ),
             ],
           ),
         ),
@@ -193,9 +202,10 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 16)),
-          Text(value,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -203,23 +213,35 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
 
   Color _getScoreColor(int score) {
     switch (score) {
-      case 5: return Colors.blue;       // 완벽
-      case 4: return Colors.green;      // 좋음
-      case 3: return Colors.orange;     // 보통
-      case 2: return Colors.deepOrange; // 나쁨
-      case 1: return Colors.red;        // 최악
-      default: return Colors.black;
+      case 5:
+        return Colors.blue; // 완벽
+      case 4:
+        return Colors.green; // 좋음
+      case 3:
+        return Colors.orange; // 보통
+      case 2:
+        return Colors.deepOrange; // 나쁨
+      case 1:
+        return Colors.red; // 최악
+      default:
+        return Colors.black;
     }
   }
 
   String _getScoreMessage(int score) {
-     switch (score) {
-       case 5: return "완벽해요! 상쾌한 아침입니다.";
-      case 4: return "좋아요! 조금만 더 일찍 일어나볼까요?";
-      case 3: return "나쁘지 않아요.";
-      case 2: return "피곤하신가요? 힘내세요!";
-      case 1: return "지각 위기! 다음엔 꼭 일찍 일어나요.";
-      default: return "";
+    switch (score) {
+      case 5:
+        return "완벽해요! 상쾌한 아침입니다.";
+      case 4:
+        return "좋아요! 조금만 더 일찍 일어나볼까요?";
+      case 3:
+        return "나쁘지 않아요.";
+      case 2:
+        return "피곤하신가요? 힘내세요!";
+      case 1:
+        return "지각 위기! 다음엔 꼭 일찍 일어나요.";
+      default:
+        return "";
     }
   }
 }

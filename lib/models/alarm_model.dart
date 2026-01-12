@@ -5,11 +5,11 @@ part 'alarm_model.g.dart';
 @HiveType(typeId: 1)
 enum MissionType {
   @HiveField(0)
-  SHAKE,
+  shake,
   @HiveField(1)
-  MATH,
+  math,
   @HiveField(2)
-  NONE,
+  none,
 }
 
 @HiveType(typeId: 0)
@@ -58,7 +58,7 @@ class Alarm extends HiveObject {
     this.isEnabled = true,
     this.isVibration = true,
     this.weekdays = const [],
-    this.missionType = MissionType.SHAKE,
+    this.missionType = MissionType.shake,
     this.missionDifficulty = 3,
     this.soundFileName = 'default_alarm.mp3',
     this.duration = 5,
@@ -112,8 +112,8 @@ class Alarm extends HiveObject {
       isVibration: json['isVibration'] ?? true,
       weekdays: List<int>.from(json['weekdays'] ?? []),
       missionType: MissionType.values.firstWhere(
-        (e) => e.toString().split('.').last == (json['missionType'] ?? 'SHAKE'),
-        orElse: () => MissionType.NONE,
+        (e) => e.toString().split('.').last.toUpperCase() == (json['missionType']?.toString().toUpperCase() ?? 'SHAKE'),
+        orElse: () => MissionType.none,
       ),
       missionDifficulty: json['missionDifficulty'] ?? 1,
       soundFileName: json['soundFileName'] ?? 'default.mp3',
