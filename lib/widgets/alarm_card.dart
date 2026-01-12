@@ -203,7 +203,7 @@ class AlarmCard extends StatelessWidget {
                     children: [
                       // Illustration
                       Image.asset(
-                        'assets/illusts/illust-list.png', // Fallback
+                        'assets/illusts/illust-math.png', // Fallback
                         width: 54,
                         height: 54,
                         fit: BoxFit.contain,

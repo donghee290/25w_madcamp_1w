@@ -29,13 +29,14 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       soundFileName: fields[9] as String,
       duration: fields[10] as int,
       snoozeCount: fields[11] as int,
+      payload: fields[12] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Alarm obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,7 +60,9 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       ..writeByte(10)
       ..write(obj.duration)
       ..writeByte(11)
-      ..write(obj.snoozeCount);
+      ..write(obj.snoozeCount)
+      ..writeByte(12)
+      ..write(obj.payload);
   }
 
   @override
