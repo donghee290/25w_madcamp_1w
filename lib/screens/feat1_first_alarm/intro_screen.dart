@@ -166,19 +166,30 @@ class _IntroScreenState extends State<IntroScreen>
                     child: SizedBox(
                       width: 220,
                       height: 44,
-                      child: ElevatedButton(
-                        onPressed: _showStartButton ? _onStartPressed : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE2C100),
-                          foregroundColor: const Color(0xFF222222),
-                          disabledBackgroundColor: const Color(0xFFE2C100),
-                          disabledForegroundColor: const Color(0xFF222222),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        elevation: 2,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: _showStartButton ? _onStartPressed : null,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: AppColors.secondaryGradient,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '굿모닝은개뿔 시작하기',
+                                style: TextStyle(
+                                  fontFamily: 'HYkanB',
+                                  fontSize: 16,
+                                  color: AppColors.baseBlue,
+                                ),
+                              ),
+                            ),
                           ),
-                          elevation: 2,
                         ),
-                        child: const Text('굿모닝은개뿔 시작하기'),
                       ),
                     ),
                   ),
