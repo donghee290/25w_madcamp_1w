@@ -18,7 +18,6 @@ void main() async {
 
   await Hive.initFlutter();
   await NotificationService().init();
-  await NotificationService().requestPermissions();
 
   Hive.registerAdapter(AlarmAdapter());
   Hive.registerAdapter(MissionTypeAdapter());
@@ -86,7 +85,7 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: AppColors.baseGray,
         appBarTheme: const AppBarTheme(
           elevation: 0,
-          backgroundColor: AppColors.baseRed,
+          backgroundColor: AppColors.baseGray,
         ),
       ),
       home: const _EntryGate(),
