@@ -1,5 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:bullshit/theme/app_colors.dart';
+import 'package:bullshit/screens/feat1_first_alarm/permission_settings_popup.dart';
+import 'package:bullshit/services/permission_service.dart';
+import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:bullshit/screens/feat1_first_alarm/first_alarm_step1_screen.dart';
 
 class IntroScreen extends StatefulWidget {
@@ -68,8 +73,41 @@ class _IntroScreenState extends State<IntroScreen>
     super.dispose();
   }
 
+  Future<bool> areAllGranted() async {
+    final noti = (await Permission.notification.status).isGranted;
+    final mic = (await Permission.microphone.status).isGranted;
+    final cam = (await Permission.camera.status).isGranted;
+
+    final overlay = !Platform.isAndroid
+        ? true
+        : (await Permission.systemAlertWindow.status).isGranted;
+
+    final exact = !Platform.isAndroid
+        ? true
+        : (await Permission.scheduleExactAlarm.status).isGranted;
+
+    return noti && mic && cam && overlay && exact;
+  }
+
   Future<void> _onStartPressed() async {
+    final allGranted = await areAllGranted();
     if (!mounted) return;
+
+    if (!allGranted) {
+      final ok = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.transparent,
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => PermissionService(),
+          child: const PermissionSettingsPopupScreen(),
+        ),
+      );
+
+      if (!mounted) return;
+      if (ok != true) return;
+    }
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const FirstAlarmStep1Screen()),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
 import 'design_system_buttons.dart';
+import 'package:bullshit/widgets/recording_overlay.dart';
 
 class SoundSelectionPopup extends StatefulWidget {
   final String initialSound;
@@ -23,6 +24,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   late String _selectedSound;
   late double _volume;
   ui.Image? _sliderThumbImage;
+  String? _customRecordingPath;
 
   final List<String> _soundOptions = [
     "엘지 굿모닝송",
@@ -38,13 +40,14 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   void initState() {
     super.initState();
     _selectedSound = widget.initialSound;
-    // If initial sound is not in list, default to first? 
-    if (!_soundOptions.contains(_selectedSound)) {
-      // If it's a custom recording or unknown, maybe handling?
-      // For now, if not found, just keep as is or select first.
-      // Let's assume it matches one or is "일어나셔야 합니다" default.
-    }
     _volume = widget.initialVolume;
+    
+    // Check if initial sound is likely a file path
+    if (_selectedSound.contains('/') || _selectedSound.contains('\\')) {
+      _customRecordingPath = _selectedSound;
+      _selectedSound = "직접 녹음하기";
+    }
+    
     _loadSliderThumbImage();
   }
 
@@ -61,6 +64,24 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     } catch (e) {
       debugPrint("Error loading slider thumb: $e");
     }
+  }
+
+  void _showRecordingOverlay() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (context, animation, secondaryAnimation) => RecordingOverlay(
+          onClose: () => Navigator.of(context).pop(),
+          onComplete: (path) {
+            Navigator.of(context).pop();
+            setState(() {
+              _customRecordingPath = path;
+              _selectedSound = "직접 녹음하기";
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -81,99 +102,111 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 child: const Text(
                   "기상 사운드",
                   style: TextStyle(
-                      fontFamily: 'HYcysM',
-                      fontSize: 22,
-                      color: AppColors.baseWhite,
-                    ),
+                    fontFamily: 'HYcysM',
+                    fontSize: 22,
+                    color: AppColors.baseWhite,
                   ),
                 ),
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close, color: AppColors.baseWhite, size: 24),
-                  ),
-                )
-              ],
-            ),
-            
-            // List
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: _soundOptions.map((sound) {
-                    final isSelected = sound == _selectedSound;
-                    final isRecording = sound == "직접 녹음하기";
-                    final iconAsset = isRecording 
-                        ? "assets/illusts/illust-record.png" 
-                        : "assets/illusts/illust-sound.png"; 
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(Icons.close, color: AppColors.baseWhite, size: 24),
+                ),
+              )
+            ],
+          ),
+          
+          // List
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: _soundOptions.map((sound) {
+                  final isSelected = sound == _selectedSound;
+                  final isRecording = sound == "직접 녹음하기";
+                  final iconAsset = isRecording 
+                      ? "assets/illusts/illust-record.png" 
+                      : "assets/illusts/illust-sound.png"; 
 
-                    return SkyblueListItem(
-                      onTap: () {
+                  return SkyblueListItem(
+                    onTap: () {
+                      if (isRecording) {
+                        _showRecordingOverlay();
+                      } else {
                         setState(() {
                           _selectedSound = sound;
+                          _customRecordingPath = null;
                         });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 50, // Base height of item row
-                            alignment: Alignment.centerLeft,
-                            child: Row(
-                              children: [
-                                Image.asset(iconAsset, width: 24, height: 24),
-                                const SizedBox(width: 15),
-                                Expanded(
-                                  child: Text(
-                                    sound,
-                                    style: const TextStyle(
-                                      fontFamily: 'HYkanB', 
-                                      fontSize: 16,
-                                      color: Color(0xFF5882B4),
-                                    ),
+                      }
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 50, // Base height of item row
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              Image.asset(iconAsset, width: 24, height: 24),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Text(
+                                  sound,
+                                  style: const TextStyle(
+                                    fontFamily: 'HYkanB', 
+                                    fontSize: 16,
+                                    color: Color(0xFF5882B4),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          if (isSelected) ...[
-                             Container(
-                                color: const Color(0xFF396DA9).withValues(alpha: 0.5), 
-                                height: 1, 
-                                margin: const EdgeInsets.symmetric(vertical: 5),
-                              ),
-                              SizedBox(
-                                height: 40,
-                                child: _buildSlider(),
-                              ),
-                              const SizedBox(height: 5),
-                          ],
+                        ),
+                        if (isSelected) ...[
+                           Container(
+                              color: const Color(0xFF396DA9).withValues(alpha: 0.5), 
+                              height: 1, 
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                            ),
+                            SizedBox(
+                              height: 40,
+                              child: _buildSlider(),
+                            ),
+                            const SizedBox(height: 5),
                         ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-            
-            // Footer
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-              child: YellowMainButton(
-                label: "이 사운드로 결정하기",
-                width: double.infinity,
-                height: 50,
-                onTap: () {
-                  Navigator.of(context).pop({
-                    'soundName': _selectedSound,
-                    'volume': _volume,
-                  });
-                },
-              ),
+          ),
+          
+          // Footer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
+            child: YellowMainButton(
+              label: "이 사운드로 결정하기",
+              width: double.infinity,
+              height: 50,
+              onTap: () {
+                // If "직접 녹음하기" is selected, return the local path.
+                // Otherwise return selected sound name.
+                String resultSound = _selectedSound;
+                if (_selectedSound == "직접 녹음하기" && _customRecordingPath != null) {
+                  resultSound = _customRecordingPath!;
+                }
+
+                Navigator.of(context).pop({
+                  'soundName': resultSound,
+                  'volume': _volume,
+                });
+              },
             ),
-          ],
+          ),
+        ],
       ),
     );
   }

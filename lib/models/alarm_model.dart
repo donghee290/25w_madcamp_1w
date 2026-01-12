@@ -50,6 +50,9 @@ class Alarm extends HiveObject {
   @HiveField(11)
   int snoozeCount;
 
+  @HiveField(12)
+  String? payload;
+
   Alarm({
     required this.id,
     required this.hour,
@@ -63,6 +66,7 @@ class Alarm extends HiveObject {
     this.soundFileName = 'default_alarm.mp3',
     this.duration = 5,
     this.snoozeCount = 3,
+    this.payload,
   });
 
   TimeOfDay get timeOfDay => TimeOfDay(hour: hour, minute: minute);
@@ -81,6 +85,7 @@ class Alarm extends HiveObject {
     String? soundFileName,
     int? duration,
     int? snoozeCount,
+    String? payload,
   }) {
     return Alarm(
       id: id ?? this.id,
@@ -95,6 +100,7 @@ class Alarm extends HiveObject {
       soundFileName: soundFileName ?? this.soundFileName,
       duration: duration ?? this.duration,
       snoozeCount: snoozeCount ?? this.snoozeCount,
+      payload: payload ?? this.payload,
     );
   }
 
@@ -121,6 +127,7 @@ class Alarm extends HiveObject {
       soundFileName: json['soundFileName'] ?? 'default.mp3',
       duration: json['duration'] ?? 5,
       snoozeCount: json['snoozeCount'] ?? 0,
+      payload: json['payload'],
     );
   }
 
@@ -137,6 +144,7 @@ class Alarm extends HiveObject {
       'soundFileName': soundFileName,
       'duration': duration,
       'snoozeCount': snoozeCount,
+      'payload': payload,
     };
   }
 }

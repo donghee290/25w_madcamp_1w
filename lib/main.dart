@@ -18,7 +18,6 @@ void main() async {
 
   await Hive.initFlutter();
   await NotificationService().init();
-  await NotificationService().requestPermissions();
 
   Hive.registerAdapter(AlarmAdapter());
   Hive.registerAdapter(MissionTypeAdapter());

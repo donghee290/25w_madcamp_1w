@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
@@ -135,6 +136,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       isVibration: _isVibration,
       duration: _duration,
       snoozeCount: _isSnoozeOn ? _snoozeCount : 0, 
+      payload: _soundName, // Storing sound path in payload for now as requested or typical pattern
     );
 
     if (widget.alarm != null) {
@@ -340,14 +342,20 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               const SizedBox(width: 15),
               Image.asset(iconPath, width: 32, height: 32),
               const SizedBox(width: 15),
-              Text(
-                content,
-                style: const TextStyle(
-                  color: Color(0xFF5882B4), 
-                  fontSize: 16,
-                  fontFamily: 'HYkanB',
+              // FIX: Wrapped in Expanded and added overflow handling
+              Expanded(
+                child: Text(
+                  content,
+                  style: const TextStyle(
+                    color: Color(0xFF5882B4), 
+                    fontSize: 16,
+                    fontFamily: 'HYkanB',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 15),
             ],
           ),
         ),
@@ -529,7 +537,10 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     
                     _buildBlueBox(
                       "기상 사운드", 
-                      _soundName, 
+                      // FIX: Display conditional logic for sound name
+                      (_soundName.contains('/') || _soundName.contains(Platform.pathSeparator))
+                          ? "직접 녹음하기" 
+                          : _soundName, 
                       "assets/illusts/illust-sound.png",
                       onTap: () async {
                          final result = await showModalBottomSheet(
