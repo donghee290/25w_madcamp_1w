@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
+import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
 import '../theme/app_colors.dart';
 
 class BlackMainButton extends StatelessWidget {
-  final IconData icon; // 디자인 명세: 아이콘(52x52)
+  final IconData icon; 
   final String label;
   final VoidCallback onTap;
-  final bool isSelected; // 선택 여부에 따른 테두리 색상 변경 등이 필요할 수 있음
+  final bool isSelected; 
+  final double width;
+  final double height;
 
   const BlackMainButton({
     super.key,
@@ -13,55 +16,68 @@ class BlackMainButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.isSelected = false,
+    this.width = 80,
+    this.height = 80,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 크기: 80x80 px
+    // 크기: 기본 80x80 px
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80,
-        height: 80,
-        padding: const EdgeInsets.all(0), 
-        decoration: ShapeDecoration(
+        width: width,
+        height: height,
+        padding: const EdgeInsets.all(0),
+        decoration: BoxDecoration(
           gradient: AppColors.blackMainGradient, // #4E4E5E -> #2E2E3E
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              width: 2,
-              // 선택되면 노란색, 아니면 #0E0E1E
-              color: isSelected ? AppColors.baseYellow : AppColors.blackButtonBorder,
-            ),
-            borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(
+             width: 2,
+             color: isSelected ? AppColors.baseYellow : AppColors.blackButtonBorder,
           ),
-          shadows: const [
+          boxShadow: const [
+             // Drop Shadow (Outer) is NOT specified in recent "inner shadow" request, 
+             // but previous code had Drop Shadow offset(2,2). 
+             // User's request: "BlackMainButton에 x=4 y=4 blur=5, x=-4 y=-4 blur=5의 inner shadow 2개 들어가 있고"
+             // Assuming ONLY these inner shadows or adding to existing?
+             // Usually implies these ARE the shadows.
              BoxShadow(
-              color: Color(0x3F000000),
-              blurRadius: 4,
-              offset: Offset(2, 2),
+              color: AppColors.shadowColor,
+              blurRadius: 5,
+              offset: Offset(4, 4),
+              inset: true,
+            ),
+             BoxShadow(
+              color: AppColors.shadowColor,
+              blurRadius: 5,
+              offset: Offset(-4, -4),
+              inset: true,
             )
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vert
-          children: [
-            // 아이콘(52x52) - Icon 위젯 사이즈 조절
-            Icon(
-              icon,
-              size: 40, 
-              color: AppColors.baseWhite,
-            ),
-            const SizedBox(height: 3), // 간격 3px
-            Text(
-              label,
-              style: const TextStyle(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: [
+              Icon(
+                icon,
+                size: 52, 
                 color: AppColors.baseWhite,
-                fontSize: 10,
-                fontFamily: 'HYkanM',
-                fontWeight: FontWeight.w400,
               ),
-            ),
-          ],
+              const SizedBox(height: 3), 
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.baseWhite,
+                  fontSize: 10,
+                  fontFamily: 'HYkanM',
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -71,47 +87,59 @@ class BlackMainButton extends StatelessWidget {
 class BlackSubButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final double width;
+  final double height;
 
   const BlackSubButton({
     super.key,
     required this.label,
     required this.onTap,
+    this.width = 95,
+    this.height = 38,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 크기: 95 x 38 px
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 95, 
-        height: 38,
+        width: width, 
+        height: height,
         alignment: Alignment.center,
-        decoration: ShapeDecoration(
+        decoration: BoxDecoration(
+          // Spec: #6E6E7E -> #3E3E4E (same as primaryGradient)
           gradient: AppColors.primaryGradient,
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(
-              width: 1,
-              color: AppColors.subButtonBorder,
-            ),
-            borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(
+            width: 1,
+            color: AppColors.subButtonBorder, // #2E2E3E
           ),
-          shadows: const [
+          boxShadow: const [
              BoxShadow(
-              color: Color(0x3F000000),
+              color: AppColors.shadowColor,
               blurRadius: 2,
-              offset: Offset(1, 1),
+              offset: Offset(2, 2),
+              inset: true,
+            ),
+             BoxShadow(
+              color: AppColors.shadowColor,
+              blurRadius: 2,
+              offset: Offset(-2, -2),
+              inset: true,
             )
           ],
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.baseWhite,
-            fontSize: 12,
-            fontFamily: 'HYkanM',
-            fontWeight: FontWeight.w400,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.baseWhite,
+              fontSize: 12,
+              fontFamily: 'HYkanM',
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ),
@@ -122,50 +150,59 @@ class BlackSubButton extends StatelessWidget {
 class RedSubButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final double width;
+  final double height;
 
   const RedSubButton({
     super.key,
     required this.label,
     required this.onTap,
+    this.width = 95,
+    this.height = 38,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Same style as BlackSubButton but Red
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 95,
-        height: 38,
+        width: width,
+        height: height,
         alignment: Alignment.center,
-        decoration: ShapeDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFA3A3), Color(0xFFC40000)],
-          ),
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(
-              width: 1,
-              color: Color(0xFF550000), // Darker red border
-            ),
+        decoration: BoxDecoration(
+            gradient: AppColors.redButtonGradient,
             borderRadius: BorderRadius.circular(5),
-          ),
-          shadows: const [
-             BoxShadow(
-              color: Color(0x3F000000),
-              blurRadius: 2,
-              offset: Offset(1, 1),
-            )
-          ],
+            border: Border.all(width: 1, color: AppColors.lightGray),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadowColor,
+                blurRadius: 4,
+                offset: Offset(0, 4),
+                // Drop Shadow first?
+                // User spec: BlackSubButton had inner x=2 y=2.
+                // Should RedSubButton be Flat with Inner? Or Drop with Inner?
+                // Spec for RedSubButton wasn't explicit. 
+                // But let's add Inner for consistency with "SubButton" style if BlackSubButton has it.
+                // However, RedSubButton originally had Drop Shadow only.
+                // If I change to Inner, it changes design.
+                // Let's STICK to Drop Shadow but FIX THE FIT issue.
+                // "오류 수정" might just be about the FittedBox/Overflow.
+                // I will NOT add Inner Shadow arbitrarily if not requested. BlackSubButton specific spec was given.
+              )
+            ],
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.baseWhite,
-            fontSize: 12,
-            fontFamily: 'HYkanM',
-            fontWeight: FontWeight.w400,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.baseWhite,
+              fontSize: 12,
+              fontFamily: 'HYkanM',
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ),
@@ -176,52 +213,62 @@ class RedSubButton extends StatelessWidget {
 class YellowMainButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry contentPadding;
 
   const YellowMainButton({
     super.key,
     required this.label,
     required this.onTap,
+    this.width,
+    this.height,
+    this.contentPadding = const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
   });
 
   @override
   Widget build(BuildContext context) {
     // Structure: Double Layer
-    // Outer: baseGray (#3E3E4E)
-    // Inner: secondaryGradient (Yellow)
-    // Radius: 5px
-    // Padding: Horizontal 4.5, Vertical 2.0
-    // Font: HYkanB, 16px, baseBlue (#396DA9)
-    
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: width,
+        height: height,
         padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 2.0),
         decoration: BoxDecoration(
           color: AppColors.baseGray,
           borderRadius: BorderRadius.circular(5),
-          boxShadow: const [
-             BoxShadow(
-              color: Color(0x3F000000), 
-              blurRadius: 2, offset: Offset(2, 2)
-            )
-          ]
+          // Outer shadow? Spec says "Inner Box has shadow".
         ),
         child: Container(
           alignment: Alignment.center,
-          decoration: ShapeDecoration(
+          decoration: BoxDecoration(
             gradient: AppColors.secondaryGradient,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
+            borderRadius: BorderRadius.circular(5),
+            boxShadow: const [
+               BoxShadow(
+                color: AppColors.shadowColor, 
+                blurRadius: 2, 
+                offset: Offset(2, 2)
+              ),
+              BoxShadow(
+                color: AppColors.shadowColor, 
+                blurRadius: 2, 
+                offset: Offset(-2, -2)
+              )
+            ],
           ),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.baseBlue,
-              fontSize: 16,
-              fontFamily: 'HYkanB',
-              fontWeight: FontWeight.w700,
+          padding: contentPadding,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.baseBlue,
+                fontSize: 16,
+                fontFamily: 'HYkanB',
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -233,21 +280,26 @@ class YellowMainButton extends StatelessWidget {
 class GrayButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry contentPadding;
 
   const GrayButton({
     super.key,
     required this.label,
     required this.onTap,
+    this.width,
+    this.height,
+    this.contentPadding = const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
   });
 
   @override
   Widget build(BuildContext context) {
-    // Outer: baseGray
-    // Inner: lightGray
-    // Font: HYkanM, 16px, Black
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: width,
+        height: height,
         padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 2.0),
         decoration: BoxDecoration(
           color: AppColors.baseGray,
@@ -255,20 +307,21 @@ class GrayButton extends StatelessWidget {
         ),
         child: Container(
           alignment: Alignment.center,
-          decoration: ShapeDecoration(
+          decoration: BoxDecoration(
             color: AppColors.lightGray,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
+            borderRadius: BorderRadius.circular(5),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontFamily: 'HYkanM',
-              fontWeight: FontWeight.w400,
+          padding: contentPadding,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'HYkanM',
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ),
@@ -280,21 +333,26 @@ class GrayButton extends StatelessWidget {
 class YellowGrayButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry contentPadding;
 
   const YellowGrayButton({
     super.key,
     required this.label,
     required this.onTap,
+    this.width,
+    this.height,
+    this.contentPadding = const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
   });
 
   @override
   Widget build(BuildContext context) {
-    // Outer: lightGray
-    // Inner: secondaryGradient
-    // Font: HYkanB, 16px, baseBlue
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: width,
+        height: height,
         padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 2.0),
         decoration: BoxDecoration(
           color: AppColors.lightGray,
@@ -302,20 +360,21 @@ class YellowGrayButton extends StatelessWidget {
         ),
         child: Container(
           alignment: Alignment.center,
-          decoration: ShapeDecoration(
+          decoration: BoxDecoration(
             gradient: AppColors.secondaryGradient,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
+            borderRadius: BorderRadius.circular(5),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.baseBlue,
-              fontSize: 16,
-              fontFamily: 'HYkanB',
-              fontWeight: FontWeight.w700,
+          padding: contentPadding,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.baseBlue,
+                fontSize: 16,
+                fontFamily: 'HYkanB',
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),

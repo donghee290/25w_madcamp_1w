@@ -5,6 +5,7 @@ import '../models/alarm_model.dart';
 import '../providers/alarm_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/design_system_buttons.dart';
+import '../widgets/custom_switch.dart';
 
 class CreateAlarmScreen extends StatefulWidget {
   final Alarm? alarm;
@@ -225,14 +226,18 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   }
 
   Widget _buildSwitchOption(String title, bool value, Function(bool) onChanged) {
-    return SwitchListTile(
-      activeThumbColor: AppColors.baseYellow,
-      activeTrackColor: AppColors.baseYellow.withValues(alpha: 0.5),
-      inactiveThumbColor: AppColors.lightGray,
-      inactiveTrackColor: AppColors.baseBlack,
-      title: Text(title, style: const TextStyle(color: AppColors.baseWhite, fontFamily: 'HYkanM')),
-      value: value,
-      onChanged: onChanged,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: const TextStyle(color: AppColors.baseWhite, fontFamily: 'HYkanM')),
+          CustomSwitch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 

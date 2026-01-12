@@ -8,6 +8,7 @@ import 'screens/alarm_result_screen.dart';
 import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
 import 'screens/main_screen.dart'; // Imported MainScreen
+import 'theme/app_theme.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -81,14 +82,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF2E2E3E),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF2E2E3E),
-          elevation: 0,
-        ),
-      ),
-      home: const MainScreen(), // 메인 스크린 분리
+      theme: AppTheme.dark,
+      home: const MainScreen(),
     );
   }
 }
