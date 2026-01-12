@@ -148,7 +148,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
       textAlign: TextAlign.center,
       text: TextSpan(
         style: const TextStyle(
-          fontFamily: 'HYcryM',
+          fontFamily: 'HYkanM',
           color: AppColors.baseWhite,
           fontSize: 16,
           height: 1.35,
@@ -158,7 +158,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
           TextSpan(
             text: highlight,
             style: const TextStyle(
-              fontFamily: 'HYcryM',
+              fontFamily: 'HYkanB',
               color: AppColors.baseRed,
             ),
           ),
