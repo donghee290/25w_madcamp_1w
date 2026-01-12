@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 // ignore: unused_import
 import '../models/alarm_history.dart';
 import '../providers/history_provider.dart';
+import '../theme/app_colors.dart';
 
 class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
@@ -110,17 +111,17 @@ class GalleryScreen extends StatelessWidget {
   Color _getScoreColor(int score) {
     switch (score) {
       case 1:
-        return Colors.blue;
+        return AppColors.scoreWorst;
       case 2:
-        return Colors.green;
+        return AppColors.scoreBad;
       case 3:
-        return Colors.orange;
+        return AppColors.scoreNormal;
       case 4:
-        return Colors.deepOrange;
+        return AppColors.scoreGood;
       case 5:
-        return Colors.red;
+        return AppColors.scorePerfect;
       default:
-        return Colors.grey;
+        return AppColors.lightGray;
     }
   }
 }

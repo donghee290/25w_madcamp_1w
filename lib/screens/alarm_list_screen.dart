@@ -132,7 +132,9 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                       child: Text(
                         "알람이 없습니다.\n'추가' 버튼을 눌러 추가해주세요.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
                       ),
                     )
                   : ListView.builder(

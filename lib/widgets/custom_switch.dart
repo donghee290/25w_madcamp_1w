@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../theme/app_colors.dart';
 
 class CustomSwitch extends StatelessWidget {
   final bool value;
@@ -13,72 +13,84 @@ class CustomSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Design based on User's Figma Dump & Image
-    // Layer 1: Rim (55x28) - Silver Gradient (D9D9D9 -> 737373)
-    // Layer 2: Inner Track (45x22) - Yellow (ON) or Dark Grey (OFF)
-    // Layer 3: Thumb (24x24) - Silver Gradient + Shadow
+    // Design based on User's detailed spec:
+    // Layer 1 (Outer Rim): 55x28px, Gradient: Bottom(Light)->Top(Dark) (Concave feel)
+    // Layer 2 (Track): Inner fill. AppColors.baseYellow(ON) / AppColors.baseGray(OFF)
+    // Layer 3 (Thumb/Knob): 24x24px, Gradient: Top(Light)->Bottom(Dark) (Convex feel)
     
+    // Rim Gradient: AppColors.toggleRimGradient (Top(Dark)->Bottom(Light) is WRONG based on "Bottom is Light, Top is Dark"
+    // Wait, "Rim: 아래쪽이 밝고 위쪽이 어두움". Bottom=Light, Top=Dark. So Gradient Begin(Top) is Dark, End(Bottom) is Light.
+    // My previous AppColors.toggleRimGradient definition: colors: [Color(0xFF737373), Color(0xFFD9D9D9)]
+    // 737373 is SilverDark, D9D9D9 is SilverLight. So Top=Dark, Bottom=Light. Correct.
+    
+    // Thumb Gradient: "위쪽이 밝고 아래쪽이 어두움". Top=Light, Bottom=Dark.
+    // My AppColors.toggleThumbGradient definition: colors: [Color(0xFFD9D9D9), Color(0xFF737373)].
+    // Top=Light, Bottom=Dark. Correct.
+
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. Rim
+          // 1. Layer 1: Rim (Outer)
           Container(
             width: 55,
             height: 28,
-            decoration: ShapeDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment(0.50, 1.00),
-                end: Alignment(0.50, 0.00),
-                colors: [Color(0xFFD9D9D9), Color(0xFF737373)],
-              ),
+            decoration: const ShapeDecoration(
+              gradient: AppColors.toggleRimGradient,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                // BorderRadius should be high enough for capsule shape
+                borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
-             // shadows: const [BoxShadow(color: Color(0x3F000000), blurRadius: 2, offset: Offset(0, 2))], 
-             // Shadow removed or kept minimal? Image shows mostly flat looking rim or slight depth.
-             // Figma dump shows shadow on the container, let's keep it minimal if needed.
+              // Shadow? Spec didn't mention shadow for Rim, but "Concave feel" comes from gradient.
             ),
           ),
           
-          // 2. Track
+          // 2. Layer 2: Track (Inner)
+          // Needs to be slightly smaller to show the Rim.
+          // Rim 55x28. Let's make Track match the rim minus a border thickness.
+          // Spec: "Layer 1 (Outer Rim): 55x28px... Layer 2 (Track): 내부를 채우는 색상."
+          // Usually implies the Rim is a border.
+          // Let's assume Rim width is ~2px visual?
+          // 55 - 4 = 51, 28 - 4 = 24. 
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 47, // Slightly smaller than 55 - (border*2)
-            height: 22, // Slightly smaller than 28
+            width: 51, 
+            height: 24, 
             decoration: ShapeDecoration(
-              color: value ? const Color(0xFFF9E000) : const Color(0xFF3E3E4E), // Yellow / BaseGray
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+              color: value ? AppColors.baseYellow : AppColors.baseGray,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
             ),
           ),
 
-          // 3. Thumb (Animated Position)
+          // 3. Layer 3: Thumb (Knob)
+          // 24x24px.
+          // Animation: Left <-> Right.
+          // Container width 55. Thumb 24. 
+          // Center is 27.5. Thumb center is 12.
+          // Max movement range: 55 - 24 = 31px total free space?
+          // Wait, Padding?
+          // Let's use AnimatedAlign with a padded area.
           SizedBox(
-            width: 55, // Wrapper to control alignment range
+            width: 55, 
             height: 28,
             child: AnimatedAlign(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              // Adjust alignment to fit within the track visually
-              // -1.0 is left, 1.0 is right. 
-              // Need to pad slightly so it doesn't touch the rim edge?
+              // alignment -1.0 is far left edge. 1.0 is far right edge.
+              // We need it slightly inside.
               alignment: value ? const Alignment(0.85, 0.0) : const Alignment(-0.85, 0.0), 
               child: Container(
                 width: 24,
                 height: 24,
                 decoration: const ShapeDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(0.50, -0.00),
-                    end: Alignment(0.50, 1.00),
-                    colors: [Color(0xFFEEEEEE), Color(0xFFCCCCCC)], // Silver Light
-                  ),
+                  gradient: AppColors.toggleThumbGradient,
                   shape: OvalBorder(),
                   shadows: [
                     BoxShadow(
-                      color: Color(0x3F000000),
+                      color: AppColors.shadowColor,
                       blurRadius: 3,
                       offset: Offset(0, 2),
                     )

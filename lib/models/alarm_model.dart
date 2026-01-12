@@ -112,7 +112,9 @@ class Alarm extends HiveObject {
       isVibration: json['isVibration'] ?? true,
       weekdays: List<int>.from(json['weekdays'] ?? []),
       missionType: MissionType.values.firstWhere(
-        (e) => e.toString().split('.').last.toUpperCase() == (json['missionType']?.toString().toUpperCase() ?? 'SHAKE'),
+        (e) =>
+            e.toString().split('.').last.toUpperCase() ==
+            (json['missionType']?.toString().toUpperCase() ?? 'SHAKE'),
         orElse: () => MissionType.none,
       ),
       missionDifficulty: json['missionDifficulty'] ?? 1,

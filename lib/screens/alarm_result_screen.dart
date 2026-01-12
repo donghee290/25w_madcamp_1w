@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:provider/provider.dart'; // import provider
+import '../theme/app_colors.dart';
 import '../models/alarm_history.dart';
 import '../providers/history_provider.dart';
+import '../widgets/design_system_buttons.dart';
 
 class AlarmResultScreen extends StatefulWidget {
   final int scheduledHour;
@@ -161,12 +163,14 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
               ),
               Text(
                 _getScoreMessage(score),
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: AppColors.scoreText),
               ),
 
               const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () async {
+              const SizedBox(height: 40),
+              YellowMainButton(
+                label: "확인 (갤러리에 저장)",
+                onTap: () async {
                   // 저장 로직 (HistoryProvider)
                   final historyEntry = AlarmHistory(
                     timestamp: dismissalTime,
@@ -186,7 +190,6 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
                     Navigator.of(context).pop(); // 홈으로
                   }
                 },
-                child: const Text("확인 (갤러리에 저장)"),
               ),
             ],
           ),
@@ -214,17 +217,17 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
   Color _getScoreColor(int score) {
     switch (score) {
       case 5:
-        return Colors.blue; // 완벽
+        return AppColors.scorePerfect; // 완벽
       case 4:
-        return Colors.green; // 좋음
+        return AppColors.scoreGood; // 좋음
       case 3:
-        return Colors.orange; // 보통
+        return AppColors.scoreNormal; // 보통
       case 2:
-        return Colors.deepOrange; // 나쁨
+        return AppColors.scoreBad; // 나쁨
       case 1:
-        return Colors.red; // 최악
+        return AppColors.scoreWorst; // 최악
       default:
-        return Colors.black;
+        return AppColors.baseBlack;
     }
   }
 
