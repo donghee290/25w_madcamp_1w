@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/alarm_provider.dart';
+import '../providers/next_alarm_provider.dart';
 import 'create_alarm_screen.dart';
 import '../widgets/alarm_card.dart';
 import '../widgets/design_system_buttons.dart';
@@ -85,16 +86,20 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Subtitle (Time remaining - Placeholder for now)
-          const Align(
+          //Subtitle (Time remaining)
+          Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-              '7시간 56분 뒤 기상이다.',
-              style: TextStyle(
-                color: AppColors.baseWhite,
-                fontSize: 18,
-                fontFamily: 'HYcysM',
-              ),
+            child: Consumer<NextAlarmProvider>(
+              builder: (context, nextAlarmProvider, _) {
+                return Text(
+                  nextAlarmProvider.label,
+                  style: const TextStyle(
+                    color: AppColors.baseWhite,
+                    fontSize: 18,
+                    fontFamily: 'HYkanB',
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 15),

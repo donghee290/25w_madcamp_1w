@@ -46,7 +46,7 @@ class OutroScreen extends StatelessWidget {
                 child: Text(
                   '알람 생성 완료.\n이제부터는 변명 없다.\n기상은 우리가 담당한다.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'HYcysM',
                     fontSize: 22,
                     height: 1.45,
