@@ -10,7 +10,6 @@ import 'providers/history_provider.dart';
 import 'screens/main_screen.dart'; // Imported MainScreen
 import 'theme/app_theme.dart';
 import 'screens/feat1_first_alarm/intro_screen.dart';
-import 'theme/app_colors.dart'; // Using relative import since package:bullshit might work but relative is safer given context consistency
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

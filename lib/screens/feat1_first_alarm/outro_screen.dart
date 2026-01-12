@@ -9,6 +9,8 @@ class OutroScreen extends StatelessWidget {
     final box = Hive.box('appBox');
     await box.put('hasSeenIntro', true);
 
+    if (!context.mounted) return;
+
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const MainScreen()),
       (_) => false,
