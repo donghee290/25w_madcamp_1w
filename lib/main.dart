@@ -9,6 +9,8 @@ import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
 import 'screens/main_screen.dart'; // Imported MainScreen
 import 'theme/app_theme.dart';
+import 'screens/feat1_first_alarm/intro_screen.dart';
+import 'theme/app_colors.dart'; // Using relative import since package:bullshit might work but relative is safer given context consistency
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -25,14 +27,13 @@ void main() async {
 
   await Hive.openBox<Alarm>('alarmBox');
   await Hive.openBox<AlarmHistory>('historyBox');
+  await Hive.openBox('appBox');
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AlarmProvider()),
-        ChangeNotifierProvider(
-          create: (_) => HistoryProvider(),
-        ), // HistoryProvider 추가
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
       ],
       child: const MyApp(),
     ),
@@ -83,7 +84,31 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       theme: AppTheme.dark,
-      home: const MainScreen(),
+      home: const _EntryGate(),
     );
+  }
+}
+
+class _EntryGate extends StatefulWidget {
+  const _EntryGate();
+
+  @override
+  State<_EntryGate> createState() => _EntryGateState();
+}
+
+class _EntryGateState extends State<_EntryGate> {
+  late final bool _hasSeenIntro;
+
+  @override
+  void initState() {
+    super.initState();
+    final box = Hive.box('appBox');
+    _hasSeenIntro = box.get('hasSeenIntro', defaultValue: false) as bool;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasSeenIntro) return const MainScreen();
+    return const IntroScreen();
   }
 }
