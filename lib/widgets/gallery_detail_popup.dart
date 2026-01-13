@@ -115,15 +115,14 @@ class GalleryDetailPopup extends StatelessWidget {
               ),
 
               // Image
+              // Image section
               Container(
                 width: 280,
                 height: 280,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: AppColors.baseWhite, width: 2),
                   image: DecorationImage(
                     image: AssetImage(item.imagePath),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),

@@ -23,13 +23,14 @@ class AlarmHistoryAdapter extends TypeAdapter<AlarmHistory> {
       scheduledMinute: fields[3] as int,
       characterName: fields[4] as String,
       characterColorValue: fields[5] as int,
+      imagePath: fields[6] == null ? '' : fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, AlarmHistory obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.timestamp)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class AlarmHistoryAdapter extends TypeAdapter<AlarmHistory> {
       ..writeByte(4)
       ..write(obj.characterName)
       ..writeByte(5)
-      ..write(obj.characterColorValue);
+      ..write(obj.characterColorValue)
+      ..writeByte(6)
+      ..write(obj.imagePath);
   }
 
   @override

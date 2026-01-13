@@ -29,5 +29,9 @@ class AlarmHistory extends HiveObject {
     required this.scheduledMinute,
     required this.characterName,
     required this.characterColorValue,
+    this.imagePath = '', // Default to empty if not present
   });
+
+  @HiveField(6, defaultValue: '')
+  final String imagePath;
 }

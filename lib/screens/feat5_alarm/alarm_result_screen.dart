@@ -71,6 +71,21 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
         debugPrint("Alarm not found for Result Screen: $e");
       }
     }
+    
+    // Parse mission type from payload if available (index 8)
+    // Payload: alarm|id|hour|minute|sound|volume|duration|snooze|missionType
+    if (parts.length >= 9) {
+      try {
+        final int missionIndex = int.parse(parts[8]);
+        if (missionIndex >= 0 && missionIndex < MissionType.values.length) {
+          setState(() {
+            _missionType = MissionType.values[missionIndex];
+          });
+        }
+      } catch (e) {
+        debugPrint("Error parsing mission type from payload: $e");
+      }
+    }
   }
 
   void _calculateScore() {
@@ -170,18 +185,20 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
 
             // RANDOM IMAGE
             Container(
-              width: 268,
-              height: 268,
+              width: 270,
+              height: 270,
               decoration: BoxDecoration(
+                color: Colors.transparent, // Explicitly transparent
                 image: DecorationImage(
                   image: AssetImage(_randomImagePath),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain, // Changed to contain to preserve aspect ratio
                 ),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x59000000),
+                    color: Color(0x59000000), // 35% Black
                     blurRadius: 4,
                     offset: Offset(0, 4),
+                    spreadRadius: 0,
                   )
                 ],
               ),
@@ -314,6 +331,7 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
                      scheduledMinute: widget.scheduledMinute,
                      characterName: "랜덤", 
                      characterColorValue: Colors.blue.toARGB32(),
+                     imagePath: _randomImagePath,
                    );
 
                    await Provider.of<HistoryProvider>(

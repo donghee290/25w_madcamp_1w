@@ -18,7 +18,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Height: 103px as per Figma adaptation in previous code, 
+    // Height: 103px as per Figma adaptation in previous code,
     // Image shows distinct dark area.
     // Background: Primary Gradient (#6E6E7E -> #3E3E4E)
     // Buttons: 3 items (List, Add, Gallery)
@@ -27,9 +27,7 @@ class CustomBottomNavBar extends StatelessWidget {
     return Container(
       width: double.infinity,
       // Removed fixed height: 105
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
+      decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
       // Add bottom padding from MediaQuery to account for system navigation bar
       padding: EdgeInsets.only(
         top: 10,
@@ -49,7 +47,7 @@ class CustomBottomNavBar extends StatelessWidget {
             label: '새로운 알람',
             imagePath: 'assets/illusts/illust-alarm.png',
             onTap: onNewAlarmTap,
-            isSelected: false, 
+            isSelected: false,
           ),
           BlackMainButton(
             label: '기상 갤러리',
