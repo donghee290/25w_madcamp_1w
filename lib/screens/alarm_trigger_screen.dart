@@ -224,7 +224,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
                               label: "미션 시작하기",
                               width: double.infinity,
                               height: 60,
-                              onTap: _handleWakeUp,
+                              onTap: _handleStartMission,
                             ),
                           ],
                         ),
