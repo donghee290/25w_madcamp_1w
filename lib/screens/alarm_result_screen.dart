@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:provider/provider.dart'; // import provider
-import '../theme/app_colors.dart';
+
 import '../models/alarm_history.dart';
 import '../providers/history_provider.dart';
 import '../widgets/design_system_buttons.dart';
+import 'package:intl/intl.dart';
+import '../models/alarm_model.dart';
+import '../providers/alarm_provider.dart';
 
 class AlarmResultScreen extends StatefulWidget {
   final int scheduledHour;
@@ -25,25 +28,52 @@ class AlarmResultScreen extends StatefulWidget {
 class _AlarmResultScreenState extends State<AlarmResultScreen> {
   late DateTime dismissalTime;
   late int score;
-  late String characterName;
-  late Color characterColor;
   late int diffMinutes;
+  
+  // Random Image
+  late String _randomImagePath;
+  
+  // Confetti / Animation? (Optional, skipping for now)
+
+  // Fetched Alarm Data
+  String _alarmLabel = "알람";
+  MissionType _missionType = MissionType.math;
 
   @override
   void initState() {
     super.initState();
     dismissalTime = DateTime.now();
     _calculateScore();
-    _selectRandomCharacter();
+    _selectRandomImage();
+    
+    // Defer alarm lookup to next frame or simple sync lookup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchAlarmDetails();
+    });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _fetchAlarmDetails() {
+    if (widget.payload == null) return;
+    
+    final parts = widget.payload!.split('|');
+    // alarm|id|hour|minute|...
+    if (parts.length >= 2) {
+      final String id = parts[1];
+      final alarmProvider = Provider.of<AlarmProvider>(context, listen: false);
+      try {
+        final alarm = alarmProvider.alarms.firstWhere((a) => a.id == id);
+        setState(() {
+          _alarmLabel = alarm.label.isEmpty ? "알람" : alarm.label;
+          _missionType = alarm.missionType;
+        });
+      } catch (e) {
+        // Alarm might be deleted or not found
+        debugPrint("Alarm not found for Result Screen: $e");
+      }
+    }
   }
 
   void _calculateScore() {
-    // 1. 오늘 날짜의 예정된 시간 생성
     final now = DateTime.now();
     DateTime scheduledTime = DateTime(
       now.year,
@@ -53,34 +83,16 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
       widget.scheduledMinute,
     );
 
-    // 만약 dismissal이 예정 시간보다 *이전*이라면 (하루 전 등의 케이스),
-    // 혹은 dismissal이 너무 늦어서 *다음날*로 인식될 수도 있는데,
-    // 여기선 단순하게 일(day) 차이 보정은 생략하고, 시/분 차이로만 비교하거나
-    // 가장 가까운 과거의 scheduledTime을 찾는 로직이 필요할 수 있음.
-    // MVP: 일단 같은 날로 가정하되, scheduledTime이 미래라면(=새벽 알람을 전날 밤에 껐거나 등) 하루 뺌
     if (scheduledTime.isAfter(dismissalTime)) {
       if (scheduledTime.difference(dismissalTime).inHours > 12) {
         scheduledTime = scheduledTime.subtract(const Duration(days: 1));
       }
-    } else {
-      // scheduledTime이 dismissalTime보다 과거인 경우 (정상)
-      // 만약 차이가 너무 크다면(23시간 등) 어제 알람일 수 있으니 보정 필요할 수 있으나 생략
     }
 
-    // 시간 차이 계산 (분 단위, 절대값)
-    // 늦게 일어난 경우만 따지므로 dismissal - scheduled
-    // 일찍 일어난 경우는 0분 지연으로 처리
     int diff = dismissalTime.difference(scheduledTime).inMinutes;
     if (diff < 0) diff = 0;
-
     diffMinutes = diff;
 
-    // 점수 로직 (반대로 수정: 빨리 일어날수록 높은 점수)
-    // 3이하 : 5점 (완벽)
-    // 3-10 : 4점 (좋음)
-    // 10-20 : 3점 (보통)
-    // 20-60 : 2점 (나쁨)
-    // 60이상 : 1점 (최악)
     if (diff <= 3) {
       score = 5;
     } else if (diff <= 10) {
@@ -94,162 +106,231 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
     }
   }
 
-  void _selectRandomCharacter() {
-    // 임시 캐릭터 로직: 랜덤 색상 + 이름
-    final random = Random();
-    final colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
+  void _selectRandomImage() {
+    final images = [
+      'illust-pepe.png',
+      'illust-math.png',
+      'illust-write.png',
+      'illust-shake.png',
+      'illust-colors.png',
+      'illust-alarm.png',
     ];
-    final names = ["파이리", "꼬부기", "이상해씨", "피카츄", "잠만보"];
+    final random = Random();
+    _randomImagePath = "assets/illusts/${images[random.nextInt(images.length)]}";
+  }
+  
+  String _getScoreMessage(int score) {
+    switch (score) {
+      case 5: return "완벽\n해요!";
+      case 4: return "훌륭\n해요!";
+      case 3: return "좋아\n요!";
+      case 2: return "아쉽\n네요";
+      case 1: return "지각\n위기";
+      default: return "완벽\n해요!";
+    }
+  }
 
-    int index = random.nextInt(colors.length);
-    characterColor = colors[index];
-    characterName = names[index];
+  String _getMissionIconAsset(MissionType type) {
+    return "assets/illusts/illust-${type.name}.png";
   }
 
   @override
   Widget build(BuildContext context) {
+    // Date Formatting
+    // "2026년 1월 11일(일)"
+    final String dateString = DateFormat('yyyy년 M월 d일(E)', 'ko_KR').format(dismissalTime);
+    
+    // Time Formatting
+    // "11:03 AM" -> separate 11:03 and AM
+    final String timeNumbers = DateFormat('hh:mm').format(dismissalTime);
+    final String timeAmPm = DateFormat('a').format(dismissalTime);
+
+    // Provide default fallback for label
+    final String displayLabel = _alarmLabel; 
+
     return Scaffold(
-      appBar: AppBar(title: const Text("기상 결과")),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 1. 캐릭터 일러스트 (Placeholder)
-              Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: characterColor.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: characterColor, width: 3),
+      backgroundColor: const Color(0xFF2E2E3E),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Spacer(flex: 1),
+            // TOP TEXT
+            const Text(
+              '기.상.완.료\n대.다.나.다.너',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28, // 24 -> 28
+                fontFamily: 'HYcysM',
+                fontWeight: FontWeight.w400,
+                height: 1.42,
+              ),
+            ),
+            const SizedBox(height: 20), // 30 -> 20
+
+            // RANDOM IMAGE
+            Container(
+              width: 268,
+              height: 268,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(_randomImagePath),
+                  fit: BoxFit.cover,
                 ),
-                child: Icon(Icons.person, size: 80, color: characterColor),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x59000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 4),
+                  )
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                "파트너: $characterName",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 30),
+            ),
 
-              // 2. 정보 표시
-              _buildInfoRow(
-                "기상 예정 시각",
-                "${widget.scheduledHour.toString().padLeft(2, '0')}:${widget.scheduledMinute.toString().padLeft(2, '0')}",
-              ),
-              _buildInfoRow(
-                "실제 해제 시각",
-                "${dismissalTime.hour.toString().padLeft(2, '0')}:${dismissalTime.minute.toString().padLeft(2, '0')}",
-              ),
-              _buildInfoRow("지연 시간", "$diffMinutes 분"),
+            const Spacer(flex: 1),
 
-              const Divider(height: 40),
+            // INFO SECTION (Row)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Left Column: Date, Time, Title
+                  Expanded(
+                    flex: 4, // Increase flex to prevent overflow with larger text
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Date
+                        Text(
+                          dateString,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20, // 16 -> 20
+                            fontFamily: 'HYkanB',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 2), // 5 -> 2
+                        // Time
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              timeNumbers,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36, // 32 -> 36
+                                fontFamily: 'HYcysM',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              timeAmPm,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 28, // 24 -> 28
+                                fontFamily: 'HYcysM',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2), // 5 -> 2
+                        // Title
+                        Text(
+                          displayLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24, // 20 -> 24
+                            fontFamily: 'HYkanM',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-              // 3. 점수
-              const Text("기상 점수", style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 10),
-              Text(
-                "$score 점",
-                style: TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: _getScoreColor(score),
-                ),
+                  // Right Column: Mission Icon, Score
+                  Expanded(
+                    flex: 3, // Increase flex area
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                         // Mission Icon
+                         Container(
+                           width: 64, // 54 -> 64
+                           height: 68, // 58 -> 68
+                           margin: const EdgeInsets.only(right: 10),
+                           decoration: BoxDecoration(
+                             image: DecorationImage(
+                               image: AssetImage(_getMissionIconAsset(_missionType)),
+                               fit: BoxFit.contain,
+                             ),
+                           ),
+                         ),
+                         // Score Text
+                         // Use Flexible to allow wrapping if really needed, but try to keep it 1 line or 2
+                         Flexible(
+                           child: Text(
+                             _getScoreMessage(score),
+                             style: const TextStyle(
+                               color: Color(0xFFF9E000), // Yellow
+                               fontSize: 28, // 24 -> 28
+                               fontFamily: 'HYkanB',
+                               fontWeight: FontWeight.w400,
+                               height: 1.2
+                             ),
+                           ),
+                         ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                _getScoreMessage(score),
-                style: const TextStyle(color: AppColors.scoreText),
-              ),
+            ),
 
-              const SizedBox(height: 40),
-              const SizedBox(height: 40),
-              YellowMainButton(
-                label: "확인 (갤러리에 저장)",
+            const Spacer(flex: 2),
+
+            // BUTTON
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+              child: YellowMainButton(
+                label: "기상 완료!",
+                width: double.infinity,
+                height: 60,
                 onTap: () async {
-                  // 저장 로직 (HistoryProvider)
-                  final historyEntry = AlarmHistory(
-                    timestamp: dismissalTime,
-                    score: score,
-                    scheduledHour: widget.scheduledHour,
-                    scheduledMinute: widget.scheduledMinute,
-                    characterName: characterName,
-                    characterColorValue: characterColor.toARGB32(),
-                  );
+                   // Save History Logic
+                   final historyEntry = AlarmHistory(
+                     timestamp: dismissalTime,
+                     score: score,
+                     scheduledHour: widget.scheduledHour,
+                     scheduledMinute: widget.scheduledMinute,
+                     characterName: "랜덤", 
+                     characterColorValue: Colors.blue.toARGB32(),
+                   );
 
-                  await Provider.of<HistoryProvider>(
-                    context,
-                    listen: false,
-                  ).addHistory(historyEntry);
+                   await Provider.of<HistoryProvider>(
+                     context,
+                     listen: false,
+                   ).addHistory(historyEntry);
 
-                  if (context.mounted) {
-                    Navigator.of(context).pop(); // 홈으로
-                  }
+                   if (context.mounted) {
+                     Navigator.of(context).pop(); 
+                   }
                 },
               ),
-            ],
-          ),
+            ),
+             const SizedBox(height: 20),
+          ],
         ),
       ),
     );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16)),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getScoreColor(int score) {
-    switch (score) {
-      case 5:
-        return AppColors.scorePerfect; // 완벽
-      case 4:
-        return AppColors.scoreGood; // 좋음
-      case 3:
-        return AppColors.scoreNormal; // 보통
-      case 2:
-        return AppColors.scoreBad; // 나쁨
-      case 1:
-        return AppColors.scoreWorst; // 최악
-      default:
-        return AppColors.baseBlack;
-    }
-  }
-
-  String _getScoreMessage(int score) {
-    switch (score) {
-      case 5:
-        return "완벽해요! 상쾌한 아침입니다.";
-      case 4:
-        return "좋아요! 조금만 더 일찍 일어나볼까요?";
-      case 3:
-        return "나쁘지 않아요.";
-      case 2:
-        return "피곤하신가요? 힘내세요!";
-      case 1:
-        return "지각 위기! 다음엔 꼭 일찍 일어나요.";
-      default:
-        return "";
-    }
   }
 }

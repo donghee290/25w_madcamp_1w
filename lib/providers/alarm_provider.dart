@@ -63,7 +63,7 @@ class AlarmProvider extends ChangeNotifier {
   Future<void> _scheduleNotification(Alarm alarm) async {
     // Payload format: alarm|id|hour|minute|sound|volume
     final String notificationPayload =
-        "alarm|${alarm.id}|${alarm.hour}|${alarm.minute}|${alarm.soundFileName}|${alarm.volume}";
+        "alarm|${alarm.id}|${alarm.hour}|${alarm.minute}|${alarm.soundFileName}|${alarm.volume}|${alarm.duration}|${alarm.snoozeCount}";
 
     await NotificationService().scheduleAlarm(
       alarmId: alarm.id.hashCode,
