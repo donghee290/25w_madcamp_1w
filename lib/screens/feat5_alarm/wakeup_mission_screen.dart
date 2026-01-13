@@ -3,6 +3,7 @@ import '../../models/alarm_model.dart';
 import 'alarm_result_screen.dart';
 import '../../widgets/missions/mission_math.dart';
 import '../../widgets/missions/mission_colors.dart';
+import '../../widgets/missions/mission_write.dart';
 import '../../widgets/missions/mission_shake.dart';
 
 class WakeupMissionScreen extends StatefulWidget {
@@ -98,8 +99,10 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
           onSuccess: _onMissionSuccess,
         );
       case MissionType.write:
-        return const Center(
-          child: Text("write 미션 준비중", style: TextStyle(color: Colors.white)),
+        return MissionWrite(
+          key: ValueKey(_round),
+          difficulty: widget.missionDifficulty,
+          onSuccess: _onMissionSuccess,
         );
       case MissionType.shake:
         return MissionShake(

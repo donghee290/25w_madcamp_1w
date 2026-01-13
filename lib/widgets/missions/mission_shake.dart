@@ -52,7 +52,7 @@ class _MissionShakeState extends State<MissionShake> {
 
   Future<void> _handleShake() async {
     _canShake = false;
-    
+
     // Haptic Feedback
     await HapticFeedback.heavyImpact();
 
@@ -90,7 +90,7 @@ class _MissionShakeState extends State<MissionShake> {
         children: [
           // Text "마구 흔들어!"
           Positioned(
-            top: 40,
+            top: 80,
             child: const Text(
               '마구 흔들어!',
               textAlign: TextAlign.center,
@@ -105,7 +105,7 @@ class _MissionShakeState extends State<MissionShake> {
 
           // Image
           Positioned(
-            bottom: 100,
+            bottom: 180,
             child: Container(
               width: 255,
               height: 245,
@@ -120,7 +120,7 @@ class _MissionShakeState extends State<MissionShake> {
 
           // Count Text
           Positioned(
-            top: 100,
+            top: 150,
             child: Text(
               '$_count',
               style: const TextStyle(
