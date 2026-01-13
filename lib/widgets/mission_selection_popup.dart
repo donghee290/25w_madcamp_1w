@@ -164,7 +164,6 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
             child: SingleChildScrollView(
               child: Column(
                 children: _types.map((type) {
-                  final selected = type == _selectedType;
                   return SkyblueListItem(
                     onTap: () => _openDetail(type),
                     child: Column(
@@ -181,7 +180,7 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
                                   _titleOf(type),
                                   style: const TextStyle(
                                     fontFamily: 'HYkanB',
-                                    fontSize: 16,
+                                    fontSize: 18,
                                     color: Color(0xFF5882B4),
                                   ),
                                 ),
@@ -189,14 +188,6 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
                             ],
                           ),
                         ),
-                        if (selected)
-                          Container(
-                            color: const Color(
-                              0xFF396DA9,
-                            ).withValues(alpha: 0.5),
-                            height: 1,
-                            margin: const EdgeInsets.only(bottom: 8),
-                          ),
                       ],
                     ),
                   );
