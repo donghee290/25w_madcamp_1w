@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gal/gal.dart';
 import 'package:intl/intl.dart';
-import '../screens/gallery_screen.dart'; // To access GalleryItem
+import '../screens/feat4_alarm_gallary/gallery_screen.dart'; // To access GalleryItem
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
 

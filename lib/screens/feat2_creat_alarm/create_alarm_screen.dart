@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/alarm_model.dart';
-import '../providers/alarm_provider.dart';
-import '../theme/app_colors.dart';
-import '../widgets/design_system_buttons.dart';
-import '../widgets/custom_switch.dart';
-import '../widgets/sound_selection_popup.dart';
-import '../widgets/mission_selection_popup.dart';
-import '../constants/sound_constants.dart';
+import '../../models/alarm_model.dart';
+import '../../providers/alarm_provider.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/design_system_buttons.dart';
+import '../../widgets/custom_switch.dart';
+import '../../widgets/sound_selection_popup.dart';
+import '../../widgets/mission_selection_popup.dart';
+import '../../constants/sound_constants.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class CreateAlarmScreen extends StatefulWidget {
@@ -263,16 +263,34 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 18), // 20 -> 18
-      color: Colors.transparent,
-      child: Text(
-        widget.alarm == null ? "기상 생성하기" : "기상 수정하기",
-        style: const TextStyle(
-          fontFamily: 'HYcysM',
-          fontSize: 24, // 22 -> 24
-          color: AppColors.baseWhite,
-        ),
+      decoration: const BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 4,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          Text(
+            widget.alarm == null ? "기상 생성하기" : "기상 수정하기",
+            style: const TextStyle(
+              fontFamily: 'HYcysM',
+              fontSize: 32,
+              color: AppColors.baseWhite,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Divider(
+            color: Colors.black,
+            thickness: 2,
+            height: 2,
+          ),
+        ],
       ),
     );
   }
@@ -786,12 +804,6 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
-                ),
-                const Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Divider(color: Colors.black, thickness: 2, height: 2),
                 ),
               ],
             ),

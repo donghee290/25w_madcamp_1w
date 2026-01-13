@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
-import '../widgets/design_system_buttons.dart';
-import '../widgets/gallery_detail_popup.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/design_system_buttons.dart';
+import '../../widgets/gallery_detail_popup.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -122,7 +122,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         // Part 1: Top Bar (Gradient + Title)
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(top: 20, bottom: 0),
+          padding: const EdgeInsets.only(top: 0, bottom: 0),
           decoration: const BoxDecoration(
             gradient: AppColors.primaryGradient,
             boxShadow: [
@@ -135,15 +135,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           child: Column(
             children: [
+              const SizedBox(height: 20),
               const Text(
                 'MY 기상 갤러리',
                 style: TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 22,
+                  fontSize: 32,
                   fontFamily: 'HYcysM',
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
               const Divider(
                 color: Colors.black,
                 thickness: 2,

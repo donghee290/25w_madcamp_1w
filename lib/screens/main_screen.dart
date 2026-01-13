@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'alarm_list_screen.dart';
-import 'gallery_screen.dart';
-import 'create_alarm_screen.dart';
+import 'feat3_alarm_list/alarm_list_screen.dart';
+import 'feat4_alarm_gallary/gallery_screen.dart';
+import 'feat2_creat_alarm/create_alarm_screen.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/alarm_provider.dart';
-import '../providers/next_alarm_provider.dart';
-import '../models/alarm_model.dart'; // Added missing import
-import 'create_alarm_screen.dart';
-import '../widgets/alarm_card.dart';
-import '../widgets/design_system_buttons.dart';
-import '../theme/app_colors.dart';
-import '../widgets/delete_confirm_popup.dart';
+import '../../providers/alarm_provider.dart';
+import '../../providers/next_alarm_provider.dart';
+import '../../models/alarm_model.dart'; 
+import '../feat2_creat_alarm/create_alarm_screen.dart';
+import '../../widgets/alarm_card.dart';
+import '../../widgets/design_system_buttons.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/delete_confirm_popup.dart';
 
 class AlarmListScreen extends StatefulWidget {
   const AlarmListScreen({super.key});
@@ -95,9 +95,6 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
               _selectedAlarmIds.clear();
             });
             Navigator.of(context).pop(); // Close Popup
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text("선택한 알람이 삭제되었습니다.")));
           },
           onCancel: () {
             setState(() {
@@ -131,30 +128,30 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
         // Part 1: Top Bar (Gradient + Title)
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(top: 28, bottom: 0),
+          padding: const EdgeInsets.only(top: 0, bottom: 0), // Remove internal padding
           decoration: const BoxDecoration(
             gradient: AppColors.primaryGradient,
             boxShadow: [
               BoxShadow(
                 color: AppColors.shadowColor,
                 blurRadius: 4,
-                offset: Offset(0, 4), // Shadow below
+                offset: Offset(0, 4),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Title
+              const SizedBox(height: 20), // Top Spacing
               const Text(
                 '기상 목록',
                 style: TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 24,
+                  fontSize: 32,
                   fontFamily: 'HYcysM',
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20), // Bottom Spacing (Equal to Top)
               const Divider(color: Colors.black, thickness: 2, height: 2),
             ],
           ),

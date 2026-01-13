@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:provider/provider.dart'; // import provider
 
-import '../models/alarm_history.dart';
-import '../providers/history_provider.dart';
-import '../widgets/design_system_buttons.dart';
+import '../../models/alarm_history.dart';
+import '../../providers/history_provider.dart';
+import '../../widgets/design_system_buttons.dart';
 import 'package:intl/intl.dart';
-import '../models/alarm_model.dart';
-import '../providers/alarm_provider.dart';
+import '../../models/alarm_model.dart';
+import '../../providers/alarm_provider.dart';
 
 class AlarmResultScreen extends StatefulWidget {
   final int scheduledHour;
