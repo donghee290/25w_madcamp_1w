@@ -46,26 +46,25 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
     }
   }
 
-
   void _onMissionSuccess() {
-    widget.onMissionComplete?.call();
     setState(() {
       _remaining--;
       _round++;
     });
 
     if (_remaining <= 0) {
-    if (_remaining <= 0) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => AlarmResultScreen(
-            scheduledHour: widget.scheduledHour,
-            scheduledMinute: widget.scheduledMinute,
+      widget.onMissionComplete?.call();
+      if (_remaining <= 0) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => AlarmResultScreen(
+              scheduledHour: widget.scheduledHour,
+              scheduledMinute: widget.scheduledMinute,
+            ),
           ),
-        ),
-        (route) => false, // Clear all previous routes
-      );
-    }
+          (route) => false, // Clear all previous routes
+        );
+      }
     }
   }
 
@@ -136,10 +135,7 @@ class _StepHeader extends StatelessWidget {
 
     Widget circle(int n) {
       final bool active = n <= current;
-      return MissionStepBadge(
-        step: n,
-        isActive: active,
-      );
+      return MissionStepBadge(step: n, isActive: active);
     }
 
     return SizedBox(

@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../constants/sound_constants.dart';
 import 'design_system_layouts.dart';
@@ -124,7 +126,7 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     // We pass the current internal state "key" or "path" if resolved?
     // Let's pass the KEY if it's special, or the resolved path?
     // The previous logic resolved it at the end.
-    // Let's pass the key, but also maybe the resolved path if available.
+    // Let's pass the key, but also maybe the resolved path?
     // For simplicity, let's behave like the UI state: Key.
     // The parent can resolve it, or we resolve it.
     // Let's stick to what _onNext/Confirm did:
@@ -192,7 +194,58 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     final path = result?.files.single.path;
     if (path == null) return;
 
-    _updateSelection(SoundConstants.myAudioKey, audioPath: path);
+    try {
+      final File tempFile = File(path);
+      final Directory appDocDir = await getApplicationDocumentsDirectory();
+      
+      // Create a unique filename
+      // Create a unique filename preserving original name
+      // Logic: original_timestamp.ext
+      final String originalName = path.split(Platform.pathSeparator).last;
+      final String extension = originalName.split('.').last;
+      final String nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+      
+      // Sanitize name just in case? unique enough with timestamp.
+      final String fileName = '${nameWithoutExt}_${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final String newPath = '${appDocDir.path}/$fileName';
+
+      // Copy the file to app storage
+      await tempFile.copy(newPath);
+
+      // Use the new persistent path
+      _updateSelection(SoundConstants.myAudioKey, audioPath: newPath);
+    } catch (e) {
+      debugPrint("Error copying imported file: $e");
+      // Fallback to original path if copy fails
+      _updateSelection(SoundConstants.myAudioKey, audioPath: path);
+    }
+  }
+
+  String _getDisplayName(String soundKey) {
+    if (soundKey == SoundConstants.myAudioKey) {
+      if (_customAudioPath != null && _customAudioPath!.isNotEmpty) {
+        try {
+          // Extract filename from path
+          String fileName = _customAudioPath!.split(Platform.pathSeparator).last;
+          
+          // Should we strip the timestamp we added? 
+          // Format: name_timestamp.ext
+          // Find the last underscore before the extension?
+          // It's heuristic. Let's try to strip the timestamp if it matches our format.
+          // Regex: (.*)_(\d+)\.(\w+)
+          // If no match, just return filename.
+          final RegExp regex = RegExp(r'^(.*)_(\d+)\.([^.]+)$');
+          final match = regex.firstMatch(fileName);
+          if (match != null) {
+            return "${match.group(1)}.${match.group(3)}"; // name.ext
+          }
+          return fileName;
+        } catch (e) {
+          return soundKey;
+        }
+      }
+    }
+    return soundKey;
   }
 
   @override
@@ -208,60 +261,76 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
         final iconAsset = (isRecording || isMyAudio)
             ? "assets/illusts/illust-record.png"
             : "assets/illusts/illust-sound.png";
+        
+        // Determine label text
+        String labelText = sound;
+        if (isMyAudio && _customAudioPath != null) {
+          // If My Audio is selected, or we have a path cached? 
+          // User said "When audio is imported... display its name".
+          // It makes sense to show the name if valid.
+          labelText = _getDisplayName(sound);
+        }
 
-        return SkyblueListItem(
-          onTap: () {
-            if (isRecording) {
-              _showRecordingOverlay();
-              return;
-            }
-            if (isMyAudio) {
-              _pickAudioFromDevice();
-              return;
-            }
-
-            if (isSelected) {
-              setState(() => _sliderOpened = !_sliderOpened);
-            } else {
-              setState(() {
-                _sliderOpened = true;
-              });
-              _updateSelection(sound);
-            }
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 50,
-                alignment: Alignment.centerLeft,
-                child: Row(
-                  children: [
-                    Image.asset(iconAsset, width: 24, height: 24),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Text(
-                        sound,
-                        style: const TextStyle(
-                          fontFamily: 'HYkanB',
-                          fontSize: 18,
-                          color: Color(0xFF5882B4),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: SkyblueListItem(
+            onTap: () {
+              if (isRecording) {
+                _showRecordingOverlay();
+              } else if (isMyAudio) {
+                _pickAudioFromDevice();
+              } else {
+                if (isSelected) {
+                  _audioPlayer.stop();
+                  setState(() {
+                    _selectedSound = ''; // Deselect
+                    _sliderOpened = false;
+                  });
+                  widget.onSelectionChanged('', _volume);
+                } else {
+                  _updateSelection(sound);
+                  setState(() {
+                    _sliderOpened = true;
+                  });
+                }
+              }
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 50,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    children: [
+                      Image.asset(iconAsset, width: 24, height: 24),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Text(
+                          labelText,
+                          style: const TextStyle(
+                            fontFamily: 'HYkanB',
+                            fontSize: 16,
+                            color: Color(0xFF5882B4),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: showSlider
-                    ? Column(
-                        children: [SizedBox(height: 40, child: _buildSlider())],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: showSlider
+                      ? Column(
+                          children: [SizedBox(height: 40, child: _buildSlider())],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         );
       }).toList(),

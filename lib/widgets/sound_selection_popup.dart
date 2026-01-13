@@ -25,7 +25,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   @override
   void initState() {
     super.initState();
-    _currentSound = ""; // Start with no selection visually, per previous logic
+    _currentSound = widget.initialSound;
     _currentVolume = widget.initialVolume;
   }
 

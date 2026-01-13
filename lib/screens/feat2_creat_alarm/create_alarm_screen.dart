@@ -780,6 +780,46 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     );
   }
 
+  String _getSoundDisplayName(String soundName) {
+    // 1. Check if it's a known Key (Preset Name)
+    if (SoundConstants.soundFileMap.containsKey(soundName)) {
+      return soundName;
+    }
+    
+    // 2. Check if it's a known Value (Filename) -> Logically reverse map
+    // (This handles legacy/mixed state where filename was saved)
+    for (var entry in SoundConstants.soundFileMap.entries) {
+      if (entry.value == soundName) {
+        return entry.key;
+      }
+    }
+
+    // 3. Check for specific keys
+    if (soundName == SoundConstants.customRecordingKey || 
+        soundName == SoundConstants.myAudioKey) {
+      return soundName;
+    }
+
+    // 4. Check if it's a file path (Custom Audio)
+    if (soundName.contains('/') || soundName.contains(Platform.pathSeparator)) {
+      try {
+        String fileName = soundName.split(Platform.pathSeparator).last;
+        // Regex to clean timestamp: name_timestamp.ext
+        final RegExp regex = RegExp(r'^(.*)_(\d+)\.(\w+)');
+        final match = regex.firstMatch(fileName);
+        if (match != null) {
+          return "${match.group(1)}.${match.group(3)}"; 
+        }
+        return fileName;
+      } catch (e) {
+        return "알 수 없는 파일";
+      }
+    }
+
+    // 5. Fallback
+    return soundName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -868,12 +908,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
                     const SizedBox(height: 25),
 
+
+
                     _buildBlueBox(
                       "기상 사운드",
-                      (_soundName.contains('/') ||
-                              _soundName.contains(Platform.pathSeparator))
-                          ? SoundConstants.customRecordingKey
-                          : _soundName,
+                      _getSoundDisplayName(_soundName),
                       "assets/illusts/illust-sound.png",
                       onBoxTap: () {
                         setState(() {

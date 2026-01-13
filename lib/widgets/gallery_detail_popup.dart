@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../screens/feat4_alarm_gallary/gallery_screen.dart'; // To access GalleryItem
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
+import 'design_system_buttons.dart'; // Added import
 
 class GalleryDetailPopup extends StatelessWidget {
   final GalleryItem item;
@@ -62,9 +63,7 @@ class GalleryDetailPopup extends StatelessWidget {
 
         if (!context.mounted) return;
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('갤러리에 저장되었습니다!')));
+        _showSuccessPopup(context);
       }
     } catch (e) {
       debugPrint("Save error: $e");
@@ -79,6 +78,43 @@ class GalleryDetailPopup extends StatelessWidget {
         context,
       ).showSnackBar(SnackBar(content: Text(errorMsg)));
     }
+  }
+
+  void _showSuccessPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (BuildContext context) {
+        return Center(
+          child: PopupSmall(
+            height: 180,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "갤러리에 저장되었습니다.",
+                  style: TextStyle(
+                    fontFamily: 'HYkanB',
+                    fontSize: 18,
+                    color: AppColors.baseWhite,
+                  ),
+                ),
+                const SizedBox(height: 25),
+                YellowMainButton(
+                  label: "확인",
+                  width: 100,
+                  height: 40,
+                  onTap: () {
+                    Navigator.of(context).pop(); // Close success popup
+                    Navigator.of(context).pop(); // Close detail popup
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   String _getWeekday(DateTime date) {
@@ -122,7 +158,7 @@ class GalleryDetailPopup extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(item.imagePath),
-                    fit: BoxFit.contain,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -181,7 +217,7 @@ class GalleryDetailPopup extends StatelessWidget {
                           const SizedBox(height: 5),
                           // Title
                           Text(
-                            "주말은 쉬는 날!!", // Placeholder or item.label
+                            item.score >= 4 ? "최고의 컨디션!" : "조금 더 힘내봐요", // Dynamic Placeholder
                             style: const TextStyle(
                               color: AppColors.baseWhite,
                               fontSize: 18,
