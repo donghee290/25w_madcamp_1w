@@ -191,7 +191,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                   final isRecording =
                       sound == SoundConstants.customRecordingKey;
                   final isMyAudio = sound == SoundConstants.myAudioKey;
-
+                  
                   final iconAsset = (isRecording || isMyAudio)
                       ? "assets/illusts/illust-record.png"
                       : "assets/illusts/illust-sound.png";
