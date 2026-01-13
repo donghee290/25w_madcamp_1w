@@ -306,7 +306,7 @@ class _MissionDifficultySelectionPopupState
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
             child: YellowMainButton(
-              label: "이 미션으로 시작하기",
+              label: "이 미션으로 결정하기",
               width: double.infinity,
               height: 50,
               onTap: () {

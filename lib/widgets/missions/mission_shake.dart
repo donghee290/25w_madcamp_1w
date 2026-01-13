@@ -105,7 +105,7 @@ class _MissionShakeState extends State<MissionShake> {
 
           // Image
           Positioned(
-            bottom: 100,
+            bottom: 130,
             child: Container(
               width: 255,
               height: 245,
