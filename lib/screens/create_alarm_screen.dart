@@ -657,7 +657,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "알람 지속시간",
+              "미루기 시간",
               style: TextStyle(
                 color: AppColors.baseWhite,
                 fontSize: 14, // 12 -> 14
@@ -965,7 +965,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
                     const SizedBox(height: 40),
                     YellowMainButton(
-                      label: "기상 생성하기",
+                      label: widget.alarm == null ? "기상 생성하기" : "기상 수정하기",
                       onTap: _saveAlarm,
                       width: double.infinity,
                       height: 50,
