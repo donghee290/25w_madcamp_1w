@@ -70,16 +70,13 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
 
           // List
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SoundSelectionList(
-                initialSound: _currentSound,
-                initialVolume: _currentVolume,
-                onSelectionChanged: (sound, volume) {
-                  _currentSound = sound;
-                  _currentVolume = volume;
-                },
-              ),
+            child: SoundSelectionList(
+              initialSound: _currentSound,
+              initialVolume: _currentVolume,
+              onSelectionChanged: (sound, volume) {
+                _currentSound = sound;
+                _currentVolume = volume;
+              },
             ),
           ),
 
@@ -95,7 +92,9 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 if (result.isEmpty) {
                   result = widget.initialSound;
                 }
-                Navigator.of(context).pop({'soundName': result, 'volume': _currentVolume});
+                Navigator.of(
+                  context,
+                ).pop({'soundName': result, 'volume': _currentVolume});
               },
             ),
           ),
