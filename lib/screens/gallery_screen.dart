@@ -82,7 +82,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         timestamp: DateTime.now().subtract(const Duration(minutes: 50)),
       ),
       GalleryItem(
-        imagePath: 'assets/illusts/illust-questionmark.png',
+        imagePath: 'assets/illusts/illust-alarm.png',
         score: 5,
         timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
       ),

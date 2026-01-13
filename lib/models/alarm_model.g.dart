@@ -31,13 +31,14 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       duration: fields[10] as int,
       snoozeCount: fields[11] as int,
       payload: fields[12] as String?,
+      volume: fields[14] == null ? 0.5 : fields[14] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, Alarm obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -65,7 +66,9 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       ..writeByte(12)
       ..write(obj.payload)
       ..writeByte(13)
-      ..write(obj.missionCount);
+      ..write(obj.missionCount)
+      ..writeByte(14)
+      ..write(obj.volume);
   }
 
   @override

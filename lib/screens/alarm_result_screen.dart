@@ -37,6 +37,11 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
     _selectRandomCharacter();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _calculateScore() {
     // 1. 오늘 날짜의 예정된 시간 생성
     final now = DateTime.now();

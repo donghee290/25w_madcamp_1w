@@ -127,18 +127,22 @@ class NotificationService {
       _nextInstanceOfTime(hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'alarm_channel_id',
-          'Alarm Channel',
-          channelDescription: 'Channel for Alarm Notifications',
+          'alarm_channel_custom_sound', // New Channel ID
+          'Alarm Channel (Custom Sound)',
+          channelDescription: 'Channel for Alarm Notifications with custom in-app sound',
           importance: Importance.max,
-          priority: Priority.high,
+          priority: Priority.max, // Changed to max
           fullScreenIntent: true,
+          playSound: false, // Silence system sound
+          enableVibration: true,
           audioAttributesUsage: AudioAttributesUsage.alarm,
+          category: AndroidNotificationCategory.alarm, // Force Alarm Category
+          visibility: NotificationVisibility.public,   // Show on lock screen
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
-          presentSound: true,
+          presentSound: false, // Silence system sound on iOS too
           interruptionLevel: InterruptionLevel.timeSensitive,
         ),
       ),
@@ -168,18 +172,22 @@ class NotificationService {
       _nextInstanceOfDayAndTime(weekday, hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'alarm_channel_id',
-          'Alarm Channel',
-          channelDescription: 'Channel for Alarm Notifications',
+          'alarm_channel_custom_sound', // New Channel ID
+          'Alarm Channel (Custom Sound)',
+          channelDescription: 'Channel for Alarm Notifications with custom in-app sound',
           importance: Importance.max,
-          priority: Priority.high,
-          fullScreenIntent: true, // 풀스크린 인텐트 (알람 화면 띄우기 위함)
+          priority: Priority.max, // Changed to max
+          fullScreenIntent: true,
+          playSound: false, // Silence system sound
+          enableVibration: true,
           audioAttributesUsage: AudioAttributesUsage.alarm,
+          category: AndroidNotificationCategory.alarm, // Force Alarm Category
+          visibility: NotificationVisibility.public,   // Show on lock screen
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
-          presentSound: true,
+          presentSound: false, // Silence system sound on iOS too
           interruptionLevel: InterruptionLevel.timeSensitive,
         ),
       ),

@@ -36,7 +36,7 @@ class GalleryDetailPopup extends StatelessWidget {
   String _getMissionAsset() {
     // In real app, GalleryItem should store missionType.
     // Placeholder: Return specific icon based on score or random
-    return "assets/illusts/illust-questionmark.png"; // Placeholder
+    return "assets/illusts/illust-math.png"; // Placeholder
   }
 
   Future<void> _saveToGallery(BuildContext context) async {

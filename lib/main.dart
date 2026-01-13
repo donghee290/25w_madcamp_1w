@@ -5,12 +5,13 @@ import 'models/alarm_model.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/next_alarm_provider.dart';
 import 'services/notification_service.dart';
-import 'screens/alarm_result_screen.dart';
+import 'screens/alarm_trigger_screen.dart';
 import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
 import 'screens/main_screen.dart';
 import 'theme/app_theme.dart';
 import 'screens/feat1_first_alarm/intro_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -18,6 +19,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
+  await initializeDateFormatting('ko_KR', null);
   await NotificationService().init();
 
   Hive.registerAdapter(AlarmAdapter());
@@ -60,6 +62,44 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _configureSelectNotificationSubject();
+    _checkNotificationLaunchDetails();
+  }
+
+  Future<void> _checkNotificationLaunchDetails() async {
+    final notificationAppLaunchDetails = await NotificationService()
+        .flutterLocalNotificationsPlugin
+        .getNotificationAppLaunchDetails();
+
+    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+      final payload =
+          notificationAppLaunchDetails?.notificationResponse?.payload;
+      if (payload != null) {
+        _handlePayload(payload);
+      }
+    }
+  }
+
+  void _handlePayload(String payload) {
+    // Payload: id|duration|hour|minute
+    final parts = payload.split('|');
+    if (parts.length >= 4) {
+      final int hour = int.parse(parts[2]);
+      final int minute = int.parse(parts[3]);
+
+      // Schedule post-frame to ensure navigator is ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder:
+                (context) => AlarmTriggerScreen(
+                  scheduledHour: hour,
+                  scheduledMinute: minute,
+                  payload: payload,
+                ),
+          ),
+        );
+      });
+    }
   }
 
   void _configureSelectNotificationSubject() {
@@ -67,22 +107,7 @@ class _MyAppState extends State<MyApp> {
       String? payload,
     ) async {
       if (payload != null) {
-        // Payload: id|duration|hour|minute
-        final parts = payload.split('|');
-        if (parts.length >= 4) {
-          final int hour = int.parse(parts[2]);
-          final int minute = int.parse(parts[3]);
-
-          await navigatorKey.currentState?.push(
-            MaterialPageRoute(
-              builder: (context) => AlarmResultScreen(
-                scheduledHour: hour,
-                scheduledMinute: minute,
-                payload: payload,
-              ),
-            ),
-          );
-        }
+        _handlePayload(payload);
       }
     });
   }

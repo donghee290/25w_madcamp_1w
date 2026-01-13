@@ -247,6 +247,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       missionDifficulty: _missionDifficulty,
       missionCount: _missionCount,
       payload: _missionPayload,
+      volume: _volume,
     );
 
     if (widget.alarm != null) {
@@ -265,9 +266,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 18), // 20 -> 18
       color: Colors.transparent,
-      child: const Text(
-        "기상 생성하기",
-        style: TextStyle(
+      child: Text(
+        widget.alarm == null ? "기상 생성하기" : "기상 수정하기",
+        style: const TextStyle(
           fontFamily: 'HYcysM',
           fontSize: 24, // 22 -> 24
           color: AppColors.baseWhite,

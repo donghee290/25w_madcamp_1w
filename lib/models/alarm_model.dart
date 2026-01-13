@@ -58,6 +58,9 @@ class Alarm extends HiveObject {
   @HiveField(13, defaultValue: 2)
   int missionCount;
 
+  @HiveField(14, defaultValue: 0.5)
+  double volume;
+
   Alarm({
     required this.id,
     required this.hour,
@@ -73,6 +76,7 @@ class Alarm extends HiveObject {
     this.duration = 5,
     this.snoozeCount = 3,
     this.payload,
+    this.volume = 0.5,
   });
 
   TimeOfDay get timeOfDay => TimeOfDay(hour: hour, minute: minute);
@@ -93,6 +97,7 @@ class Alarm extends HiveObject {
     int? duration,
     int? snoozeCount,
     String? payload,
+    double? volume,
   }) {
     return Alarm(
       id: id ?? this.id,
@@ -109,6 +114,7 @@ class Alarm extends HiveObject {
       duration: duration ?? this.duration,
       snoozeCount: snoozeCount ?? this.snoozeCount,
       payload: payload ?? this.payload,
+      volume: volume ?? this.volume,
     );
   }
 
@@ -137,6 +143,7 @@ class Alarm extends HiveObject {
       duration: json['duration'] ?? 5,
       snoozeCount: json['snoozeCount'] ?? 0,
       payload: json['payload'],
+      volume: (json['volume'] ?? 0.5).toDouble(),
     );
   }
 
@@ -155,6 +162,7 @@ class Alarm extends HiveObject {
       'duration': duration,
       'snoozeCount': snoozeCount,
       'payload': payload,
+      'volume': volume,
     };
   }
 }

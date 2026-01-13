@@ -195,9 +195,12 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // DELETE Button (Toggle Label/Style)
-                    _isDeleteMode
-                        ? RedSubButton(label: '삭제', onTap: _toggleDeleteMode)
-                        : BlackSubButton(label: '선택', onTap: _toggleDeleteMode),
+                    if (_isDeleteMode)
+                      _selectedAlarmIds.isEmpty
+                          ? BlackSubButton(label: '취소', onTap: _toggleDeleteMode)
+                          : RedSubButton(label: '삭제', onTap: _toggleDeleteMode)
+                    else
+                      BlackSubButton(label: '선택', onTap: _toggleDeleteMode),
 
                     // ADD Button
                     BlackSubButton(label: '추가', onTap: _onAddPressed),
