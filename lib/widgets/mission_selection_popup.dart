@@ -27,6 +27,9 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
   late int _selectedDifficulty;
   late int _selectedCount;
 
+  late final Map<MissionType, int> _difficultyByType;
+  late final Map<MissionType, int> _countByType;
+
   final List<MissionType> _types = const [
     MissionType.math,
     MissionType.colors,
@@ -40,6 +43,26 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
     _selectedType = widget.initialType;
     _selectedDifficulty = widget.initialDifficulty;
     _selectedCount = widget.initialCount;
+
+    _difficultyByType = {
+      MissionType.math: 1,
+      MissionType.colors: 1,
+      MissionType.write: 1,
+      MissionType.shake: 0,
+    };
+
+    _countByType = {
+      MissionType.math: 2,
+      MissionType.colors: 2,
+      MissionType.write: 2,
+      MissionType.shake: 5,
+    };
+
+    _difficultyByType[_selectedType] = widget.initialDifficulty;
+    _countByType[_selectedType] = widget.initialCount;
+
+    _selectedDifficulty = _difficultyByType[_selectedType]!;
+    _selectedCount = _countByType[_selectedType]!;
   }
 
   String _titleOf(MissionType type) {
@@ -70,8 +93,8 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
       isScrollControlled: true,
       builder: (_) => MissionDifficultySelectionPopup(
         type: type,
-        initialDifficulty: _selectedDifficulty,
-        initialCount: _selectedCount,
+        initialDifficulty: _difficultyByType[type]!,
+        initialCount: _countByType[type]!,
       ),
     );
 
@@ -83,6 +106,9 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
           result['missionDifficulty'] as int? ?? _selectedDifficulty;
       final int newCount = result['missionCount'] as int? ?? _selectedCount;
       final String? newPayload = result['payload'] as String?;
+
+      _difficultyByType[newType] = newDifficulty;
+      _countByType[newType] = newCount;
 
       Navigator.of(context).pop({
         'missionType': newType,

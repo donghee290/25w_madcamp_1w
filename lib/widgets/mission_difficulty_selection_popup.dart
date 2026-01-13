@@ -91,7 +91,6 @@ class _MissionDifficultySelectionPopupState
   }
 
   Widget _exampleBox(MissionType type) {
-    // 디자인처럼 흰 박스 안에 예제
     Widget inner;
     switch (type) {
       case MissionType.math:
@@ -229,7 +228,7 @@ class _MissionDifficultySelectionPopupState
       width: double.infinity,
       child: Column(
         children: [
-          // Header
+          //Header
           Stack(
             alignment: Alignment.center,
             children: [
@@ -264,7 +263,7 @@ class _MissionDifficultySelectionPopupState
           const SizedBox(height: 8),
           _exampleBox(type),
 
-          // 난이도
+          //mission difficulty
           if (difficultyOpts.isNotEmpty) ...[
             _sectionTitle("난이도"),
             _optionRow(
@@ -274,7 +273,7 @@ class _MissionDifficultySelectionPopupState
             ),
           ],
 
-          // 횟수
+          //mission count
           _sectionTitle("미션 횟수"),
           _optionRow(
             options: countOpts,
