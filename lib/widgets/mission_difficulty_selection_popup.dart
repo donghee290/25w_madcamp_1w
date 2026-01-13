@@ -92,34 +92,54 @@ class _MissionDifficultySelectionPopupState
 
   Widget _exampleBox(MissionType type) {
     Widget inner;
+
     switch (type) {
       case MissionType.math:
-        inner = const Text(
-          "3 + 4 =",
-          style: TextStyle(
+        final String expr = switch (_difficulty) {
+          1 => "3 + 4 =",
+          2 => "23 + 17 =",
+          3 => "43 x 9 =",
+          4 => "(72 x 6) + 32 =",
+          5 => "31 + (37 x 11) =",
+          _ => "3 + 4 =",
+        };
+        inner = Text(
+          expr,
+          style: const TextStyle(
             fontFamily: 'HYkanB',
             fontSize: 22,
             color: Colors.black,
           ),
         );
         break;
+
       case MissionType.colors:
-        inner = Image.asset(
-          "assets/illusts/illust-colorsExample1.png",
-          height: 90,
-          fit: BoxFit.contain,
-        );
+        final String img = switch (_difficulty) {
+          1 => "assets/illusts/illust-colorsExample1.png",
+          2 => "assets/illusts/illust-colorsExample2.png",
+          3 => "assets/illusts/illust-colorsExample3.png",
+          _ => "assets/illusts/illust-colorsExample1.png",
+        };
+        inner = Image.asset(img, height: 70, fit: BoxFit.contain);
         break;
+
       case MissionType.write:
-        inner = const Text(
-          "아이스크림",
-          style: TextStyle(
+        final String phrase = switch (_difficulty) {
+          1 => "아이스크림",
+          2 => "좋은 일만 있을 거예요.",
+          3 => "동해물과 백두산이 마르고 닳도록\n하느님이 보우하사 우리나라 만세...",
+          _ => "아이스크림",
+        };
+        inner = Text(
+          phrase,
+          style: const TextStyle(
             fontFamily: 'HYkanB',
             fontSize: 22,
             color: Colors.black,
           ),
         );
         break;
+
       case MissionType.shake:
         inner = const Text(
           "핸드폰을 흔드세요~!",
