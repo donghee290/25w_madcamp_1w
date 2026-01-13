@@ -55,6 +55,9 @@ class Alarm extends HiveObject {
   @HiveField(12)
   String? payload;
 
+  @HiveField(13)
+  int missionCount;
+
   Alarm({
     required this.id,
     required this.hour,
@@ -65,6 +68,7 @@ class Alarm extends HiveObject {
     this.weekdays = const [],
     this.missionType = MissionType.math,
     this.missionDifficulty = 1,
+    this.missionCount = 2,
     this.soundFileName = 'default_alarm.mp3',
     this.duration = 5,
     this.snoozeCount = 3,
@@ -84,6 +88,7 @@ class Alarm extends HiveObject {
     List<int>? weekdays,
     MissionType? missionType,
     int? missionDifficulty,
+    int? missionCount,
     String? soundFileName,
     int? duration,
     int? snoozeCount,
@@ -99,6 +104,7 @@ class Alarm extends HiveObject {
       weekdays: weekdays ?? List.from(this.weekdays),
       missionType: missionType ?? this.missionType,
       missionDifficulty: missionDifficulty ?? this.missionDifficulty,
+      missionCount: missionCount ?? this.missionCount,
       soundFileName: soundFileName ?? this.soundFileName,
       duration: duration ?? this.duration,
       snoozeCount: snoozeCount ?? this.snoozeCount,
@@ -126,6 +132,7 @@ class Alarm extends HiveObject {
         orElse: () => MissionType.math,
       ),
       missionDifficulty: json['missionDifficulty'] ?? 1,
+      missionCount: json['missionCount'] ?? 2,
       soundFileName: json['soundFileName'] ?? 'default.mp3',
       duration: json['duration'] ?? 5,
       snoozeCount: json['snoozeCount'] ?? 0,
@@ -143,6 +150,7 @@ class Alarm extends HiveObject {
       'weekdays': weekdays,
       'missionType': missionType.toString().split('.').last,
       'missionDifficulty': missionDifficulty,
+      'missionCount': missionCount,
       'soundFileName': soundFileName,
       'duration': duration,
       'snoozeCount': snoozeCount,

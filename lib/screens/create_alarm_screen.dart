@@ -34,11 +34,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
-
   String _missionName = "미션을 선택해주세요.";
   MissionType _missionType = MissionType.math;
-  int _missionDifficulty = 1;
   String? _missionPayload;
+  int _missionDifficulty = 1;
+  int _missionCount = 2;
 
   // Settings
   bool _isVibration = true;
@@ -79,7 +79,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       _snoozeCount = a.snoozeCount;
 
       _missionType = a.missionType;
+      _missionPayload = a.payload;
       _missionDifficulty = a.missionDifficulty;
+      _missionCount = a.missionCount;
       _missionName = _missionTitleOf(_missionType);
 
       // Time Logic
@@ -167,11 +169,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       isVibration: _isVibration,
       duration: _duration,
       snoozeCount: _isSnoozeOn ? _snoozeCount : 0,
-
+      soundFileName: _soundName,
       missionType: _missionType,
       missionDifficulty: _missionDifficulty,
-
-      soundFileName: _soundName,
+      missionCount: _missionCount,
+      payload: _missionPayload,
     );
 
     if (widget.alarm != null) {
@@ -763,7 +765,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     _buildBlueBox(
                       "기상 미션",
                       _missionName,
-                      _missionIconOf(_missionType),
+                      (_missionName == "미션을 선택해주세요.")
+                          ? "assets/illusts/illust-questionmark.png"
+                          : _missionIconOf(_missionType),
                       onTap: () async {
                         final result = await showModalBottomSheet(
                           context: context,
@@ -773,6 +777,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                             initialType: _missionType,
                             initialPayload: _missionPayload,
                             initialDifficulty: _missionDifficulty,
+                            initialCount: _missionCount,
                           ),
                         );
 
@@ -781,6 +786,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                             _missionType = result['missionType'] as MissionType;
                             _missionDifficulty =
                                 result['missionDifficulty'] as int;
+                            _missionCount = result['missionCount'] as int;
+                            _missionPayload = result['payload'] as String?;
                             _missionName = result['missionName'] as String;
                           });
                         }
