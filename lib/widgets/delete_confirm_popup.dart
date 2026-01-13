@@ -47,7 +47,7 @@ class DeleteConfirmPopup extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -59,7 +59,7 @@ class DeleteConfirmPopup extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                   ),
                   RedSubButton(
-                    label: "정말이요",
+                    label: "정말이요!",
                     onTap: onConfirm,
                     width: 120, // Adjusted width
                     height: 45,

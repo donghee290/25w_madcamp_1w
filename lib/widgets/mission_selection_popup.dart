@@ -163,35 +163,38 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
           Expanded(
             child: SingleChildScrollView(
               child: Column(
-                children: _types.map((type) {
-                  return SkyblueListItem(
-                    onTap: () => _openDetail(type),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 70,
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            children: [
-                              Image.asset(_iconOf(type), width: 28, height: 28),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: Text(
-                                  _titleOf(type),
-                                  style: const TextStyle(
-                                    fontFamily: 'HYkanB',
-                                    fontSize: 18,
-                                    color: Color(0xFF5882B4),
-                                  ),
+                children: List.generate(_types.length, (index) {
+                  final type = _types[index];
+
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == _types.length - 1 ? 0 : 14,
+                    ),
+                    child: SkyblueListItem(
+                      onTap: () => _openDetail(type),
+                      child: Container(
+                        height: 50,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Image.asset(_iconOf(type), width: 28, height: 28),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Text(
+                                _titleOf(type),
+                                style: const TextStyle(
+                                  fontFamily: 'HYkanB',
+                                  fontSize: 18,
+                                  color: Color(0xFF5882B4),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   );
-                }).toList(),
+                }),
               ),
             ),
           ),
