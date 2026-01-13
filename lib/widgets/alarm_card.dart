@@ -99,14 +99,14 @@ class AlarmCard extends StatelessWidget {
           : onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), // Reduced Padding 10->8
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 8,
+        ), // Reduced Padding 10->8
         decoration: ShapeDecoration(
           gradient: AppColors.primaryGradient,
           shape: const Border(
-            bottom: BorderSide(
-              width: 2,
-              color: AppColors.lightBorder, 
-            ),
+            bottom: BorderSide(width: 2, color: AppColors.lightBorder),
           ),
           shadows: const [
             BoxShadow(
@@ -200,7 +200,6 @@ class AlarmCard extends StatelessWidget {
                   ),
 
                   const SizedBox(width: 5), // Reduced gap 10->5
-
                   // Right: Icon + Switch
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -208,8 +207,8 @@ class AlarmCard extends StatelessWidget {
                       // Illustration
                       Image.asset(
                         missionIconOf(alarm.missionType),
-                        width: 65, // 54 -> 65
-                        height: 65, // 54 -> 65
+                        width: 60, // 체크박스 고려
+                        height: 60, // 체크박스 고려
                         fit: BoxFit.contain,
                         errorBuilder: (c, e, s) => const Icon(
                           Icons.extension,

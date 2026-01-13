@@ -87,7 +87,7 @@ class GalleryDetailPopup extends StatelessWidget {
       builder: (BuildContext context) {
         return Center(
           child: PopupSmall(
-            height: 180,
+            height: 220,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
