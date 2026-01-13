@@ -140,9 +140,9 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   }
 
   void _handleStartMission() {
-    _audioPlayer.stop();
+    // _audioPlayer.stop(); // Removed to keep music playing
 
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => WakeupMissionScreen(
           missionType: widget.alarm.missionType,
@@ -151,6 +151,9 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
           alarmId: widget.alarm.id,
           scheduledHour: widget.alarm.hour,
           scheduledMinute: widget.alarm.minute,
+          onMissionComplete: () {
+            _audioPlayer.stop();
+          },
         ),
       ),
     );

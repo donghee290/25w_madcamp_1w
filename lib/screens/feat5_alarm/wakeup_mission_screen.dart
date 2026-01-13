@@ -12,6 +12,7 @@ class WakeupMissionScreen extends StatefulWidget {
   final int missionDifficulty;
   final int missionCount;
   final String alarmId;
+  final VoidCallback? onMissionComplete;
 
   final int scheduledHour;
   final int scheduledMinute;
@@ -24,6 +25,7 @@ class WakeupMissionScreen extends StatefulWidget {
     required this.alarmId,
     required this.scheduledHour,
     required this.scheduledMinute,
+    this.onMissionComplete,
   });
 
   @override
@@ -44,7 +46,9 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
     }
   }
 
+
   void _onMissionSuccess() {
+    widget.onMissionComplete?.call();
     setState(() {
       _remaining--;
       _round++;

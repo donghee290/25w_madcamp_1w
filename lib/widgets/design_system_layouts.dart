@@ -44,7 +44,7 @@ class PopupSmall extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
+      child: SafeArea(child: child),
     );
   }
 }
@@ -101,7 +101,7 @@ class PopupBig extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
+      child: SafeArea(child: child),
     );
   }
 }
