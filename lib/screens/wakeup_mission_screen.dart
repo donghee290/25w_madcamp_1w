@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/alarm_model.dart';
 import 'alarm_result_screen.dart';
 import '../widgets/missions/mission_math.dart';
+import '../widgets/missions/mission_colors.dart';
 
 class WakeupMissionScreen extends StatefulWidget {
   final MissionType missionType;
@@ -84,8 +85,10 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
           onSuccess: _onMissionSuccess,
         );
       case MissionType.colors:
-        return const Center(
-          child: Text("colors 미션 준비중", style: TextStyle(color: Colors.white)),
+        return MissionColors(
+          key: ValueKey(_round),
+          difficulty: widget.missionDifficulty,
+          onSuccess: _onMissionSuccess,
         );
       case MissionType.write:
         return const Center(
