@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
 import 'design_system_buttons.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:bullshit/widgets/recording_overlay.dart';
 
 class SoundSelectionPopup extends StatefulWidget {
@@ -25,6 +26,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   late double _volume;
   ui.Image? _sliderThumbImage;
   String? _customRecordingPath;
+  String? _customAudioPath;
 
   final List<String> _soundOptions = [
     "엘지 굿모닝송",
@@ -33,7 +35,8 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     "이성을 끌어당기는 주파수",
     "성적이 오르는 주파수",
     "일어나는 건 박수받아 마땅함",
-    "직접 녹음하기"
+    "직접 녹음하기",
+    "내 오디오 가져오기",
   ];
 
   @override
@@ -41,20 +44,24 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     super.initState();
     _selectedSound = widget.initialSound;
     _volume = widget.initialVolume;
-    
+
     // Check if initial sound is likely a file path
     if (_selectedSound.contains('/') || _selectedSound.contains('\\')) {
       _customRecordingPath = _selectedSound;
       _selectedSound = "직접 녹음하기";
     }
-    
+
     _loadSliderThumbImage();
   }
 
   Future<void> _loadSliderThumbImage() async {
     try {
-      final ByteData data = await rootBundle.load('assets/illusts/illust-controller.png');
-      final ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final ByteData data = await rootBundle.load(
+        'assets/illusts/illust-controller.png',
+      );
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+      );
       final ui.FrameInfo fi = await codec.getNextFrame();
       if (mounted) {
         setState(() {
@@ -70,24 +77,42 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (context, animation, secondaryAnimation) => RecordingOverlay(
-          onClose: () => Navigator.of(context).pop(),
-          onComplete: (path) {
-            Navigator.of(context).pop();
-            setState(() {
-              _customRecordingPath = path;
-              _selectedSound = "직접 녹음하기";
-            });
-          },
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            RecordingOverlay(
+              onClose: () => Navigator.of(context).pop(),
+              onComplete: (path) {
+                Navigator.of(context).pop();
+                setState(() {
+                  _customRecordingPath = path;
+                  _selectedSound = "직접 녹음하기";
+                });
+              },
+            ),
       ),
     );
+  }
+
+  Future<void> _pickAudioFromDevice() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      allowedExtensions: ['mp3', 'm4a', 'wav', 'aac', 'ogg', 'flac'],
+    );
+
+    final path = result?.files.single.path;
+    if (path == null) return;
+
+    setState(() {
+      _customAudioPath = path;
+      _customRecordingPath = null;
+      _selectedSound = "내 오디오 가져오기";
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return PopupBig(
-      height: 520, 
+      height: 520,
       width: double.infinity, // Fill width
       child: Column(
         children: [
@@ -113,31 +138,39 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 right: 20,
                 child: GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.close, color: AppColors.baseWhite, size: 24),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.baseWhite,
+                    size: 24,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
-          
+
           // List
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: _soundOptions.map((sound) {
                   final isSelected = sound == _selectedSound;
-                  final isRecording = sound == "직접 녹음하기";
-                  final iconAsset = isRecording 
-                      ? "assets/illusts/illust-record.png" 
-                      : "assets/illusts/illust-sound.png"; 
+                  final isRecordIcon =
+                      sound == "직접 녹음하기" || sound == "내 오디오 가져오기";
+                  final iconAsset = isRecordIcon
+                      ? "assets/illusts/illust-record.png"
+                      : "assets/illusts/illust-sound.png";
 
                   return SkyblueListItem(
                     onTap: () {
-                      if (isRecording) {
+                      if (sound == "직접 녹음하기") {
                         _showRecordingOverlay();
+                      } else if (sound == "내 오디오 가져오기") {
+                        _pickAudioFromDevice();
                       } else {
                         setState(() {
                           _selectedSound = sound;
                           _customRecordingPath = null;
+                          _customAudioPath = null;
                         });
                       }
                     },
@@ -155,7 +188,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                                 child: Text(
                                   sound,
                                   style: const TextStyle(
-                                    fontFamily: 'HYkanB', 
+                                    fontFamily: 'HYkanB',
                                     fontSize: 16,
                                     color: Color(0xFF5882B4),
                                   ),
@@ -165,16 +198,15 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                           ),
                         ),
                         if (isSelected) ...[
-                           Container(
-                              color: const Color(0xFF396DA9).withValues(alpha: 0.5), 
-                              height: 1, 
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                            ),
-                            SizedBox(
-                              height: 40,
-                              child: _buildSlider(),
-                            ),
-                            const SizedBox(height: 5),
+                          Container(
+                            color: const Color(
+                              0xFF396DA9,
+                            ).withValues(alpha: 0.5),
+                            height: 1,
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                          ),
+                          SizedBox(height: 40, child: _buildSlider()),
+                          const SizedBox(height: 5),
                         ],
                       ],
                     ),
@@ -183,7 +215,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
               ),
             ),
           ),
-          
+
           // Footer
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
@@ -195,14 +227,18 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 // If "직접 녹음하기" is selected, return the local path.
                 // Otherwise return selected sound name.
                 String resultSound = _selectedSound;
-                if (_selectedSound == "직접 녹음하기" && _customRecordingPath != null) {
+                if (_selectedSound == "직접 녹음하기" &&
+                    _customRecordingPath != null) {
                   resultSound = _customRecordingPath!;
                 }
+                if (_selectedSound == "내 오디오 가져오기" &&
+                    _customAudioPath != null) {
+                  resultSound = _customAudioPath!;
+                }
 
-                Navigator.of(context).pop({
-                  'soundName': resultSound,
-                  'volume': _volume,
-                });
+                Navigator.of(
+                  context,
+                ).pop({'soundName': resultSound, 'volume': _volume});
               },
             ),
           ),
@@ -217,16 +253,17 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
       children: [
         // Background Track
         Container(
-           height: 24, // Slightly smaller than create screen
-           width: double.infinity,
-           decoration: BoxDecoration(
-             gradient: const LinearGradient(
-               begin: Alignment.topCenter, end: Alignment.bottomCenter,
-               colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)]
-             ),
-             borderRadius: BorderRadius.circular(12),
-             border: Border.all(color: const Color(0xFF6E6E7E)),
-           ),
+          height: 24, // Slightly smaller than create screen
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF6E6E7E)),
+          ),
         ),
         // Slider
         SliderTheme(
@@ -234,7 +271,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
             trackHeight: 2,
             activeTrackColor: Colors.transparent,
             inactiveTrackColor: Colors.transparent,
-            thumbShape: _CustomThumbShape(image: _sliderThumbImage), 
+            thumbShape: _CustomThumbShape(image: _sliderThumbImage),
             overlayShape: SliderComponentShape.noOverlay,
           ),
           child: Slider(
@@ -270,21 +307,26 @@ class _CustomThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     if (image == null) {
-       final Canvas canvas = context.canvas;
-       final Paint paint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFE0E0E0), Color(0xFF808080)],
-      ).createShader(Rect.fromCircle(center: center, radius: 15));
+      final Canvas canvas = context.canvas;
+      final Paint paint = Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFE0E0E0), Color(0xFF808080)],
+        ).createShader(Rect.fromCircle(center: center, radius: 15));
       canvas.drawCircle(center, 15, paint);
       return;
     }
 
     final Canvas canvas = context.canvas;
     final dst = Rect.fromCenter(center: center, width: 36, height: 36);
-    final src = Rect.fromLTWH(0, 0, image!.width.toDouble(), image!.height.toDouble());
-    
+    final src = Rect.fromLTWH(
+      0,
+      0,
+      image!.width.toDouble(),
+      image!.height.toDouble(),
+    );
+
     canvas.drawImageRect(image!, src, dst, Paint());
   }
 }
