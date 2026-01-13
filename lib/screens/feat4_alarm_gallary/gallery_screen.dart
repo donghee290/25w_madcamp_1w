@@ -39,11 +39,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
     // Convert History to Gallery Items (Filtering out ones without images if needed)
     final items = historyList
         .where((h) => h.imagePath.isNotEmpty)
-        .map((h) => GalleryItem(
-              imagePath: h.imagePath,
-              score: h.score,
-              timestamp: h.timestamp,
-            ))
+        .map(
+          (h) => GalleryItem(
+            imagePath: h.imagePath,
+            score: h.score,
+            timestamp: h.timestamp,
+          ),
+        )
         .toList();
 
     if (_isSortByScore) {
@@ -56,7 +58,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       // Default Latest
       items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     }
-    
+
     return items;
   }
 
@@ -85,7 +87,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               const Text(
                 'MY 기상 갤러리',
                 style: TextStyle(
@@ -94,12 +96,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   fontFamily: 'HYcysM',
                 ),
               ),
-              const SizedBox(height: 20),
-              const Divider(
-                color: Colors.black,
-                thickness: 2,
-                height: 2,
-              ),
+              const SizedBox(height: 15),
+              const Divider(color: Colors.black, thickness: 2, height: 2),
             ],
           ),
         ),
@@ -150,18 +148,20 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   return GridView.builder(
                     padding: const EdgeInsets.all(20),
                     itemCount: items.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, // 3 columns
-                      crossAxisSpacing: 15,
-                      mainAxisSpacing: 15,
-                      childAspectRatio: 1.0, // Square
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, // 3 columns
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 15,
+                          childAspectRatio: 1.0, // Square
+                        ),
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
                           showDialog(
                             context: context,
-                            builder: (context) => GalleryDetailPopup(item: items[index]),
+                            builder: (context) =>
+                                GalleryDetailPopup(item: items[index]),
                           );
                         },
                         child: Container(

@@ -276,7 +276,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           Text(
             widget.alarm == null ? "기상 생성하기" : "기상 수정하기",
             style: const TextStyle(
@@ -285,7 +285,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               color: AppColors.baseWhite,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           const Divider(color: Colors.black, thickness: 2, height: 2),
         ],
       ),

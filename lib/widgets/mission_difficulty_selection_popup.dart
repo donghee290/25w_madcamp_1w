@@ -161,28 +161,35 @@ class _MissionDifficultySelectionPopupState
     }
 
     return Container(
+      height: type == MissionType.write
+          ? 120
+          : type == MissionType.shake
+          ? 130
+          : null,
       margin: const EdgeInsets.symmetric(horizontal: 22),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: type == MissionType.shake
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: 18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(0),
       ),
-      child: Column(
-        children: [
-          if (type != MissionType.shake) ...[
-            const Text(
-              "예제",
-              style: TextStyle(
-                fontFamily: 'HYkanB',
-                fontSize: 16,
-                color: Colors.black,
-              ),
+      child: type == MissionType.shake
+          ? Center(child: inner)
+          : Column(
+              children: [
+                const Text(
+                  "예제",
+                  style: TextStyle(
+                    fontFamily: 'HYkanB',
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(child: inner),
+              ],
             ),
-            const SizedBox(height: 12),
-          ],
-          Center(child: inner),
-        ],
-      ),
     );
   }
 
