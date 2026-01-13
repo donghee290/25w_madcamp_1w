@@ -26,6 +26,7 @@ dependencies:
   record: ^6.0.0
   audioplayers: ^6.0.0
   path_provider: ^2.1.2
+  gal: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +41,7 @@ flutter:
 
   assets:
     - assets/illusts/
+    - assets/sounds/
     - assets/logo.png
 
   fonts:

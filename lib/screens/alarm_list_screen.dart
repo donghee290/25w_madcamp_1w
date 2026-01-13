@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/next_alarm_provider.dart';
+import '../models/alarm_model.dart'; // Added missing import
 import 'create_alarm_screen.dart';
 import '../widgets/alarm_card.dart';
 import '../widgets/design_system_buttons.dart';
 import '../theme/app_colors.dart';
+import '../widgets/delete_confirm_popup.dart';
 
 class AlarmListScreen extends StatefulWidget {
   const AlarmListScreen({super.key});
@@ -39,18 +41,81 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
   }
 
   void _deleteSelectedAlarms() {
+    // Show Popup Confirmation
     final provider = Provider.of<AlarmProvider>(context, listen: false);
-    for (var id in _selectedAlarmIds) {
-      provider.deleteAlarm(id);
-    }
-    setState(() {
-      _isDeleteMode = false;
-      _selectedAlarmIds.clear();
-    });
+    final count = _selectedAlarmIds.length;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("선택한 알람이 삭제되었습니다.")));
+    if (count == 0) return;
+
+    // Get name for popup
+    // If 1 item: "[Name] 알람을"
+    // If >1 items: "[Name] 외 N개 알람을"
+    String targetName = "";
+    final firstId = _selectedAlarmIds.first;
+    final firstAlarm = provider.alarms.firstWhere(
+      (a) => a.id == firstId,
+      orElse: () => Alarm(
+        id: '',
+        hour: 0,
+        minute: 0,
+        label: '',
+        isEnabled: false,
+        weekdays: [],
+        isVibration: false,
+        duration: 0,
+        snoozeCount: 0,
+        missionType: MissionType.math,
+        missionDifficulty: 1,
+      ),
+    ); // Dummy fallback
+    final firstName = firstAlarm.label.isEmpty
+        ? "평일"
+        : firstAlarm.label; // Default name logic
+
+    if (count == 1) {
+      targetName = "「$firstName」";
+    } else {
+      targetName = "「$firstName」 외 ${count - 1}개";
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Force user choice
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (context) {
+        return DeleteConfirmPopup(
+          title: "정말 $targetName 알람을\n삭제하시겠습니까?", // Popup handles newline
+          onConfirm: () {
+            // Actual Delete
+            for (var id in _selectedAlarmIds) {
+              provider.deleteAlarm(id);
+            }
+            setState(() {
+              _isDeleteMode = false;
+              _selectedAlarmIds.clear();
+            });
+            Navigator.of(context).pop(); // Close Popup
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text("선택한 알람이 삭제되었습니다.")));
+          },
+          onCancel: () {
+            setState(() {
+              _isDeleteMode = false; // Exit delete mode on cancel?
+              // Logic choice: User might want to change selection.
+              // Request implies: "Cancel -> Back to normal?"
+              // Usually cancel just closes popup. But strict flow "Select -> Delete"
+              // If cancel, maybe stay in delete mode?
+              // "아니요 gray button" -> Just close popup.
+              // Let's just close popup and keep delete mode?
+              // Or exit delete mode? Usually "Cancel" means "Don't delete".
+              // I will keep Delete Mode active so they can change selection.
+            });
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
   }
 
   void _onAddPressed() {
@@ -61,63 +126,89 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
 
   // Header Widget based on Figma/Image
   Widget _buildHeader(int alarmCount) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
-      // Image shows a "Header" block that looks blended or same gradient as bg.
-      // But distinct from list.
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        border: Border(
-          bottom: BorderSide(color: Colors.white, width: 1), // Separator line
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Title
-          const Text(
-            '기상 목록',
-            style: TextStyle(
-              color: AppColors.baseWhite,
-              fontSize: 20, // Looking large
-              fontFamily: 'HYcysM',
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          //Subtitle (Time remaining)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Consumer<NextAlarmProvider>(
-              builder: (context, nextAlarmProvider, _) {
-                return Text(
-                  nextAlarmProvider.label,
-                  style: const TextStyle(
-                    color: AppColors.baseWhite,
-                    fontSize: 18,
-                    fontFamily: 'HYkanB',
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 15),
-
-          // Buttons Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // DELETE Button
-              RedSubButton(label: '삭제', onTap: _toggleDeleteMode),
-
-              // ADD Button
-              BlackSubButton(label: '추가', onTap: _onAddPressed),
+    return Column(
+      children: [
+        // Part 1: Top Bar (Gradient + Title)
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.only(top: 28, bottom: 0),
+          decoration: const BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowColor,
+                blurRadius: 4,
+                offset: Offset(0, 4), // Shadow below
+              ),
             ],
           ),
-          const SizedBox(height: 5),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Title
+              const Text(
+                '기상 목록',
+                style: TextStyle(
+                  color: AppColors.baseWhite,
+                  fontSize: 24,
+                  fontFamily: 'HYcysM',
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(color: Colors.black, thickness: 2, height: 2),
+            ],
+          ),
+        ),
+
+        // Part 2: Bottom Area (Body Color + Buttons)
+        Container(
+          width: double.infinity,
+          color: const Color(0xFF2E2E3E), // Match Body Color
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          child: Column(
+            children: [
+              //Subtitle (Time remaining)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Consumer<NextAlarmProvider>(
+                    builder: (context, nextAlarmProvider, _) {
+                      return Text(
+                        nextAlarmProvider.label,
+                        style: const TextStyle(
+                          color: AppColors.baseWhite,
+                          fontSize: 20,
+                          fontFamily: 'HYcysM',
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Buttons Row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // DELETE Button (Toggle Label/Style)
+                    _isDeleteMode
+                        ? RedSubButton(label: '삭제', onTap: _toggleDeleteMode)
+                        : BlackSubButton(label: '선택', onTap: _toggleDeleteMode),
+
+                    // ADD Button
+                    BlackSubButton(label: '추가', onTap: _onAddPressed),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 5),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -126,7 +217,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
     final alarmProvider = Provider.of<AlarmProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.baseBlack, // Fallback bg
+      backgroundColor: const Color(0xFF2E2E3E), // Corrected bg color
       body: SafeArea(
         child: Column(
           children: [
