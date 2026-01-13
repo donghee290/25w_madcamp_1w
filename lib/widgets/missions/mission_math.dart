@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 class MissionMath extends StatefulWidget {
@@ -18,9 +20,12 @@ class MissionMath extends StatefulWidget {
 class _MissionMathState extends State<MissionMath> {
   final Random _rng = Random();
 
-  late String _expressionText; // 화면에 보여줄 식
-  late int _answer; // 정답
+  late String _expressionText;
+  late int _answer;
   String _input = "";
+
+  Color _borderColor = Colors.transparent;
+  Timer? _feedbackTimer;
 
   @override
   void initState() {
@@ -34,6 +39,7 @@ class _MissionMathState extends State<MissionMath> {
       _expressionText = p.text;
       _answer = p.answer;
       _input = "";
+      _borderColor = Colors.transparent;
     });
   }
 
@@ -44,15 +50,36 @@ class _MissionMathState extends State<MissionMath> {
     setState(() => _input = _input.substring(0, _input.length - 1));
   }
 
-  void _submit() {
+  @override
+  void dispose() {
+    _feedbackTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
     final n = int.tryParse(_input);
+
+    _feedbackTimer?.cancel();
+
     if (n == _answer) {
-      widget.onSuccess();
+      await HapticFeedback.heavyImpact();
+      setState(() => _borderColor = Colors.green);
+
+      _feedbackTimer = Timer(const Duration(milliseconds: 350), () {
+        if (!mounted) return;
+        widget.onSuccess();
+      });
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("틀렸습니다. 다시 입력하세요.")));
+
+    await HapticFeedback.heavyImpact();
+    setState(() => _borderColor = Colors.red);
+
+    _feedbackTimer = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() => _borderColor = Colors.transparent);
+    });
+
     _clear();
   }
 
@@ -87,8 +114,9 @@ class _MissionMathState extends State<MissionMath> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8E8EA),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _borderColor, width: 3),
             ),
             child: Text(
               _input.isEmpty ? "문제를 풀어주세요." : _input,
