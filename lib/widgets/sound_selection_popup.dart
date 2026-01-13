@@ -191,82 +191,77 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                   final isRecording =
                       sound == SoundConstants.customRecordingKey;
                   final isMyAudio = sound == SoundConstants.myAudioKey;
-                  
+
                   final iconAsset = (isRecording || isMyAudio)
                       ? "assets/illusts/illust-record.png"
                       : "assets/illusts/illust-sound.png";
 
-                  return SkyblueListItem(
-                    onTap: () {
-                      if (isRecording) {
-                        _showRecordingOverlay();
-                      } else if (isMyAudio) {
-                        _pickAudioFromDevice();
-                      } else {
-                        if (isSelected) {
-                          // Toggle Off Logic: Stop and Deselect
-                          _audioPlayer.stop();
-                          setState(() {
-                            _selectedSound = ''; // Deselect
-                            _customRecordingPath = null;
-                            _customAudioPath = null;
-                          });
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10), // Keep vertical spacing
+                    child: SkyblueListItem(
+                      onTap: () {
+                        if (isRecording) {
+                          _showRecordingOverlay();
+                        } else if (isMyAudio) {
+                          _pickAudioFromDevice();
                         } else {
-                          // Select and Play
-                          setState(() {
-                            _selectedSound = sound;
-                            _customRecordingPath = null;
-                            _customAudioPath = null;
-                          });
-                          _playSound(sound);
+                          if (isSelected) {
+                            // Toggle Off Logic: Stop and Deselect
+                            _audioPlayer.stop();
+                            setState(() {
+                              _selectedSound = ''; // Deselect
+                              _customRecordingPath = null;
+                              _customAudioPath = null;
+                            });
+                          } else {
+                            // Select and Play
+                            setState(() {
+                              _selectedSound = sound;
+                              _customRecordingPath = null;
+                              _customAudioPath = null;
+                            });
+                            _playSound(sound);
+                          }
                         }
-                      }
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 50, // Base height of item row
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            children: [
-                              Image.asset(iconAsset, width: 24, height: 24),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: Text(
-                                  sound,
-                                  style: const TextStyle(
-                                    fontFamily: 'HYkanB',
-                                    fontSize: 16,
-                                    color: Color(0xFF5882B4),
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 50, // Base height of item row
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              children: [
+                                Image.asset(iconAsset, width: 24, height: 24),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    sound,
+                                    style: const TextStyle(
+                                      fontFamily: 'HYkanB',
+                                      fontSize: 16,
+                                      color: Color(0xFF5882B4),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: isSelected
-                              ? Column(
-                                  children: [
-                                    Container(
-                                      color: const Color(
-                                        0xFF396DA9,
-                                      ).withValues(alpha: 0.5),
-                                      height: 1,
-                                      margin: const EdgeInsets.symmetric(
-                                        vertical: 5,
-                                      ),
-                                    ),
-                                    SizedBox(height: 40, child: _buildSlider()),
-                                    const SizedBox(height: 5),
-                                  ],
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            child: isSelected
+                                ? Column(
+                                    children: [
+                                      // Blue Divider REMOVED
+                                      SizedBox(height: 40, child: _buildSlider()),
+                                      const SizedBox(height: 5),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
@@ -315,6 +310,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
 
   Widget _buildSlider() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
           "0",
@@ -412,6 +408,7 @@ class _CustomThumbShape extends SliderComponentShape {
     }
 
     final Canvas canvas = context.canvas;
+    // Draw thumb centered
     final dst = Rect.fromCenter(center: center, width: 36, height: 36);
     final src = Rect.fromLTWH(
       0,
@@ -423,3 +420,5 @@ class _CustomThumbShape extends SliderComponentShape {
     canvas.drawImageRect(image!, src, dst, Paint());
   }
 }
+
+

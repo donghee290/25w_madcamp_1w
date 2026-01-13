@@ -142,7 +142,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20), // Top Spacing
+              const SizedBox(height: 15), // Top Spacing,
               const Text(
                 '기상 목록',
                 style: TextStyle(
@@ -151,7 +151,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                   fontFamily: 'HYcysM',
                 ),
               ),
-              const SizedBox(height: 20), // Bottom Spacing (Equal to Top)
+              const SizedBox(height: 15), // Bottom Spacing (Equal to Top)
               const Divider(color: Colors.black, thickness: 2, height: 2),
             ],
           ),
