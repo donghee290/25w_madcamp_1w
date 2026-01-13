@@ -26,31 +26,34 @@ class CustomBottomNavBar extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 105, 
+      // Removed fixed height: 105
       decoration: const BoxDecoration(
         gradient: AppColors.primaryGradient,
       ),
-      padding: const EdgeInsets.only(top: 10, bottom: 15),
+      // Add bottom padding from MediaQuery to account for system navigation bar
+      padding: EdgeInsets.only(
+        top: 10,
+        bottom: 15 + MediaQuery.of(context).viewPadding.bottom,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start, // Align top
         children: [
           BlackMainButton(
             label: '기상 목록',
-            icon: Icons.assignment, // Or custom asset: 'assets/illusts/illust-list.png' ? 
-            // Design doc says: "Icon(52x52)". Let's stick to Icons for now or generic.
+            imagePath: 'assets/illusts/illust-list.png',
             onTap: onAlarmListTap,
             isSelected: currentIndex == 0,
           ),
           BlackMainButton(
             label: '새로운 알람',
-            icon: Icons.access_time_filled,
+            imagePath: 'assets/illusts/illust-alarm.png',
             onTap: onNewAlarmTap,
-            isSelected: false, // Always action
+            isSelected: false, 
           ),
           BlackMainButton(
             label: '기상 갤러리',
-            icon: Icons.photo_library,
+            imagePath: 'assets/illusts/illust-gallery.png',
             onTap: onGalleryTap,
             isSelected: currentIndex == 1,
           ),

@@ -3,7 +3,8 @@ import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
 import '../theme/app_colors.dart';
 
 class BlackMainButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath;
   final String label;
   final VoidCallback onTap;
   final bool isSelected;
@@ -12,13 +13,17 @@ class BlackMainButton extends StatelessWidget {
 
   const BlackMainButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.imagePath,
     required this.label,
     required this.onTap,
     this.isSelected = false,
     this.width = 80,
     this.height = 80,
-  });
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -63,13 +68,16 @@ class BlackMainButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 52, color: AppColors.baseWhite),
+              if (imagePath != null)
+                Image.asset(imagePath!, width: 52, height: 52)
+              else
+                Icon(icon, size: 52, color: AppColors.baseWhite),
               const SizedBox(height: 3),
               Text(
                 label,
                 style: const TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 10,
+                  fontSize: 18,
                   fontFamily: 'HYkanM',
                   fontWeight: FontWeight.w400,
                 ),
@@ -134,7 +142,7 @@ class BlackSubButton extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.baseWhite,
-              fontSize: 12,
+              fontSize: 18,
               fontFamily: 'HYkanM',
               fontWeight: FontWeight.w400,
             ),
@@ -171,7 +179,7 @@ class RedSubButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: AppColors.redButtonGradient,
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(width: 1, color: AppColors.lightGray),
+          border: Border.all(width: 1, color: AppColors.subButtonBorder),
           boxShadow: const [
             BoxShadow(
               color: AppColors.shadowColor,
@@ -197,7 +205,7 @@ class RedSubButton extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.baseWhite,
-              fontSize: 12,
+              fontSize: 18,
               fontFamily: 'HYkanM',
               fontWeight: FontWeight.w400,
             ),
@@ -266,7 +274,7 @@ class YellowMainButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: AppColors.baseBlue,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanB',
                 fontWeight: FontWeight.w700,
               ),
@@ -322,7 +330,7 @@ class GrayButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: Colors.black,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanM',
                 fontWeight: FontWeight.w400,
               ),
@@ -378,7 +386,7 @@ class YellowGrayButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: AppColors.baseBlue,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanB',
                 fontWeight: FontWeight.w700,
               ),

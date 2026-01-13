@@ -6,6 +6,8 @@ import 'design_system_layouts.dart';
 import 'design_system_buttons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:bullshit/widgets/recording_overlay.dart';
+import 'package:audioplayers/audioplayers.dart';
+import '../constants/sound_constants.dart';
 
 class SoundSelectionPopup extends StatefulWidget {
   final String initialSound;
@@ -42,7 +44,8 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   @override
   void initState() {
     super.initState();
-    _selectedSound = widget.initialSound;
+    // Start with no selection per user request
+    _selectedSound = ''; 
     _volume = widget.initialVolume;
 
     // Check if initial sound is likely a file path
@@ -52,6 +55,16 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     }
 
     _loadSliderThumbImage();
+  }
+
+  @override
+  void dispose() {
+    // Safe disposal
+    _audioPlayer.stop().catchError((e) {
+      debugPrint("Error stopping audio on dispose: $e");
+    });
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSliderThumbImage() async {
@@ -70,6 +83,30 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
       }
     } catch (e) {
       debugPrint("Error loading slider thumb: $e");
+    }
+  }
+
+  Future<void> _playSound(String soundName) async {
+    try {
+      await _audioPlayer.stop();
+
+      if (soundName == SoundConstants.customRecordingKey) {
+        if (_customRecordingPath != null) {
+          // DeviceFileSource needs string path
+          await _audioPlayer.play(DeviceFileSource(_customRecordingPath!));
+        }
+      } else {
+        // Map to asset file
+        final fileName = SoundConstants.soundFileMap[soundName];
+        if (fileName != null) {
+          // Users need to put files in assets/sounds/
+          await _audioPlayer.play(AssetSource("sounds/$fileName"));
+        } else {
+          debugPrint("No file mapped for: $soundName");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error playing sound: $e");
     }
   }
 
@@ -226,6 +263,11 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
               onTap: () {
                 // If "직접 녹음하기" is selected, return the local path.
                 // Otherwise return selected sound name.
+                // If nothing selected (empty), return initial sound (User cancelled selection effectively, or kept same)
+                // User request: "Modify to ... nothing selected state". 
+                // Context: If they click "Confirm" without selecting anything, should it keep old sound? 
+                // Yes, usually "Confirm" means "Apply changes". If no change, keep old.
+                
                 String resultSound = _selectedSound;
                 if (_selectedSound == "직접 녹음하기" &&
                     _customRecordingPath != null) {
@@ -248,8 +290,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   }
 
   Widget _buildSlider() {
-    return Stack(
-      alignment: Alignment.center,
+    return Row(
       children: [
         // Background Track
         Container(
@@ -274,9 +315,14 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
             thumbShape: _CustomThumbShape(image: _sliderThumbImage),
             overlayShape: SliderComponentShape.noOverlay,
           ),
-          child: Slider(
-            value: _volume,
-            onChanged: (v) => setState(() => _volume = v),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          "100",
+          style: TextStyle(
+            color: Color(0xFFC8C8C8),
+            fontSize: 12,
+            fontFamily: 'HYkanM',
           ),
         ),
       ],

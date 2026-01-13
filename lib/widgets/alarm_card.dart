@@ -44,7 +44,7 @@ class AlarmCard extends StatelessWidget {
             days[index],
             style: TextStyle(
               color: color,
-              fontSize: 16,
+              fontSize: 18,
               fontFamily: isSelected ? 'HYkanB' : 'HYkanM',
               fontWeight: FontWeight.w400,
             ),
@@ -99,7 +99,7 @@ class AlarmCard extends StatelessWidget {
           : onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10), // Reduced Padding
         decoration: ShapeDecoration(
           gradient: AppColors.primaryGradient,
           shape: const Border(
@@ -153,7 +153,7 @@ class AlarmCard extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: _buildDaysRow(),
                         ),
-                        const SizedBox(height: 1),
+                        const SizedBox(height: 2), // Slightly more space
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -165,17 +165,19 @@ class AlarmCard extends StatelessWidget {
                                 "$strHour:$strMinute",
                                 style: const TextStyle(
                                   color: AppColors.baseWhite,
-                                  fontSize: 32,
+                                  fontSize: 42,
                                   fontFamily: 'HYcysM',
                                   fontWeight: FontWeight.w400,
+                                  letterSpacing: -1.0,
                                 ),
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 4),
                               Text(
                                 amPm,
                                 style: const TextStyle(
-                                  color: AppColors.baseWhite,
-                                  fontSize: 24,
+                                  color:
+                                      AppColors.baseWhite, // Consistent white
+                                  fontSize: 22,
                                   fontFamily: 'HYcysM',
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -183,12 +185,13 @@ class AlarmCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4), // More space before label
                         Text(
                           alarm.label.isEmpty ? '평일' : alarm.label,
                           style: const TextStyle(
                             color: AppColors.baseWhite,
-                            fontSize: 20,
+                            fontSize: 18,
+
                             fontFamily: 'HYkanM',
                             fontWeight: FontWeight.w400,
                           ),
