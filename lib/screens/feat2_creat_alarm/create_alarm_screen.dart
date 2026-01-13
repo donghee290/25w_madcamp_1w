@@ -119,6 +119,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       _isVibration = a.isVibration;
       _duration = a.duration;
       _snoozeCount = a.snoozeCount;
+      _isSnoozeOn = a.snoozeCount > 0;
 
       _missionType = a.missionType;
       _missionPayload = a.payload;
@@ -285,11 +286,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          const Divider(
-            color: Colors.black,
-            thickness: 2,
-            height: 2,
-          ),
+          const Divider(color: Colors.black, thickness: 2, height: 2),
         ],
       ),
     );
@@ -594,7 +591,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             alignment: Alignment.center,
             children: [
               Container(
-                height: 15, // 30 -> 15 (Half)
+                height: 15,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -646,12 +643,12 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           "커스텀 설정",
           style: TextStyle(
             color: AppColors.baseWhite,
-            fontSize: 16, // 14 -> 16
+            fontSize: 16,
             fontFamily: 'HYkanM',
           ),
         ),
-        const SizedBox(height: 12), // 15 -> 12
-        // Vibration
+        const SizedBox(height: 12),
+        //Vibration
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -659,7 +656,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "진동 울리기",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 14, // 12 -> 14
+                fontSize: 14,
                 fontFamily: 'HYkanM',
               ),
             ),
@@ -669,8 +666,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 12), // 15 -> 12
-        // Duration
+        const SizedBox(height: 12),
+        //Duration
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -678,21 +675,13 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "미루기 시간",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 14, // 12 -> 14
+                fontSize: 14,
                 fontFamily: 'HYkanM',
-              ),
-            ),
-            Text(
-              "$_duration분",
-              style: const TextStyle(
-                color: AppColors.baseYellow,
-                fontSize: 14, // 12 -> 14
-                fontFamily: 'HYkanB',
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6), // 8 -> 6
+        const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [1, 3, 5]
@@ -705,8 +694,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               )
               .toList(),
         ),
-        const SizedBox(height: 12), // 15 -> 12
-        // Snooze
+        const SizedBox(height: 12),
+        //Snooze
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -714,30 +703,42 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "알람 미루기",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 14, // 12 -> 14
+                fontSize: 14,
                 fontFamily: 'HYkanM',
               ),
             ),
             CustomSwitch(
               value: _isSnoozeOn,
-              onChanged: (v) => setState(() => _isSnoozeOn = v),
+              onChanged: (v) {
+                setState(() {
+                  _isSnoozeOn = v;
+                  if (!v) {
+                    _snoozeCount = 0;
+                  } else {
+                    if (_snoozeCount == 0) _snoozeCount = 1;
+                  }
+                });
+              },
             ),
           ],
         ),
-        const SizedBox(height: 6), // 8 -> 6
+        const SizedBox(height: 6),
         Opacity(
           opacity: _isSnoozeOn ? 1.0 : 0.3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [1, 2, 3]
-                .map(
-                  (c) => _buildSelectButton(
-                    "$c회",
-                    _snoozeCount == c,
-                    () => setState(() => _snoozeCount = c),
-                  ),
-                )
-                .toList(),
+          child: AbsorbPointer(
+            absorbing: !_isSnoozeOn,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [1, 2, 3]
+                  .map(
+                    (c) => _buildSelectButton(
+                      "$c회",
+                      _snoozeCount == c,
+                      () => setState(() => _snoozeCount = c),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       ],
@@ -769,12 +770,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           child: Text(
             text,
             style: TextStyle(
-              color: isSelected
-                  ? AppColors
-                        .baseBlue // Yellow gradient needs dark text
-                  : const Color(0xFFD9D9D9),
+              color: isSelected ? AppColors.baseBlue : const Color(0xFFD9D9D9),
               fontFamily: isSelected ? 'HYkanB' : 'HYkanM',
-              fontSize: 14, // 12 -> 14
+              fontSize: 14,
             ),
           ),
         ),
@@ -785,11 +783,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2E2E3E), // Dark Background
+      backgroundColor: const Color(0xFF2E2E3E),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            //Header
             Stack(
               alignment: Alignment.centerLeft,
               children: [
@@ -814,16 +812,16 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Label Input
+                    //Label Input
                     const Text(
                       "기상 이름",
                       style: TextStyle(
                         color: AppColors.baseWhite,
-                        fontSize: 14, // 12 -> 14
+                        fontSize: 14,
                         fontFamily: 'HYkanM',
                       ),
                     ),
-                    const SizedBox(height: 6), // 8 -> 6
+                    const SizedBox(height: 6),
                     Container(
                       height: 40,
                       decoration: BoxDecoration(
@@ -859,7 +857,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       "기상 시간",
                       style: TextStyle(
                         color: AppColors.baseWhite,
-                        fontSize: 14, // 12 -> 14
+                        fontSize: 14,
                         fontFamily: 'HYkanM',
                       ),
                     ),
