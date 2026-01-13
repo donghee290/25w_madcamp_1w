@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class MissionMath extends StatefulWidget {
   final int difficulty;
@@ -63,7 +64,7 @@ class _MissionMathState extends State<MissionMath> {
 
     if (n == _answer) {
       await HapticFeedback.heavyImpact();
-      setState(() => _borderColor = Colors.green);
+      setState(() => _borderColor = AppColors.scoreGood);
 
       _feedbackTimer = Timer(const Duration(milliseconds: 350), () {
         if (!mounted) return;
@@ -73,7 +74,7 @@ class _MissionMathState extends State<MissionMath> {
     }
 
     await HapticFeedback.heavyImpact();
-    setState(() => _borderColor = Colors.red);
+    setState(() => _borderColor = AppColors.baseRed);
 
     _feedbackTimer = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
