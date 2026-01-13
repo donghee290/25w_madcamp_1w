@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/alarm_model.dart';
+import '../../models/alarm_model.dart';
 import 'alarm_result_screen.dart';
-import '../widgets/missions/mission_math.dart';
+import '../../widgets/missions/mission_math.dart';
+import '../../widgets/missions/mission_shake.dart';
 
 class WakeupMissionScreen extends StatefulWidget {
   final MissionType missionType;
@@ -33,7 +34,11 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
   @override
   void initState() {
     super.initState();
-    _remaining = widget.missionCount;
+    if (widget.missionType == MissionType.shake) {
+      _remaining = 1; // Shake mission is always 1 round (with many shakes)
+    } else {
+      _remaining = widget.missionCount;
+    }
   }
 
   void _onMissionSuccess() {
@@ -62,11 +67,13 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
         child: Column(
           children: [
             const SizedBox(height: 24),
-            _StepHeader(
-              step: (widget.missionCount - _remaining) + 1,
-              total: widget.missionCount,
-            ),
-            const SizedBox(height: 24),
+            if (widget.missionType != MissionType.shake) ...[
+              _StepHeader(
+                step: (widget.missionCount - _remaining) + 1,
+                total: widget.missionCount,
+              ),
+              const SizedBox(height: 24),
+            ],
 
             Expanded(child: _buildMissionBody()),
           ],
@@ -92,8 +99,11 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
           child: Text("write 미션 준비중", style: TextStyle(color: Colors.white)),
         );
       case MissionType.shake:
-        return const Center(
-          child: Text("shake 미션 준비중", style: TextStyle(color: Colors.white)),
+        return MissionShake(
+          key: ValueKey(_round),
+          onSuccess: _onMissionSuccess,
+          difficulty: widget.missionDifficulty,
+          targetCount: widget.missionCount, // Pass the user-set count as shake count
         );
     }
   }

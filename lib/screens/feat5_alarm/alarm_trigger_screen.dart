@@ -5,10 +5,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/alarm_model.dart';
-import '../constants/sound_constants.dart';
+import '../../models/alarm_model.dart';
+import '../../constants/sound_constants.dart';
 
-import '../widgets/design_system_buttons.dart';
+import '../../widgets/design_system_buttons.dart';
 import 'wakeup_mission_screen.dart';
 
 class AlarmTriggerScreen extends StatefulWidget {

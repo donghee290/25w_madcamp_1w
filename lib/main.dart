@@ -5,7 +5,7 @@ import 'models/alarm_model.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/next_alarm_provider.dart';
 import 'services/notification_service.dart';
-import 'screens/alarm_trigger_screen.dart';
+import 'screens/feat5_alarm/alarm_trigger_screen.dart';
 import 'models/alarm_history.dart';
 import 'providers/history_provider.dart';
 import 'screens/main_screen.dart';

@@ -99,16 +99,13 @@ class AlarmCard extends StatelessWidget {
           : onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10), // Reduced Padding
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), // Reduced Padding 10->8
         decoration: ShapeDecoration(
           gradient: AppColors.primaryGradient,
           shape: const Border(
             bottom: BorderSide(
               width: 2,
-              color: AppColors
-                  .lightBorder, // Keep as is or check if Grad White is used? Spec says "Grad White" exists.
-              // But border is solid usually. Let's keep hardcoded if not in AppColors or use AppColors.lightGray or similar?
-              // "Grad White" might be for other things. D1D1D1 matches the end of Grad White.
+              color: AppColors.lightBorder, 
             ),
           ),
           shadows: const [
@@ -202,7 +199,7 @@ class AlarmCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5), // Reduced gap 10->5
 
                   // Right: Icon + Switch
                   Row(
@@ -211,8 +208,8 @@ class AlarmCard extends StatelessWidget {
                       // Illustration
                       Image.asset(
                         missionIconOf(alarm.missionType),
-                        width: 54,
-                        height: 54,
+                        width: 65, // 54 -> 65
+                        height: 65, // 54 -> 65
                         fit: BoxFit.contain,
                         errorBuilder: (c, e, s) => const Icon(
                           Icons.extension,
