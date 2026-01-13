@@ -52,7 +52,7 @@ class _MissionShakeState extends State<MissionShake> {
 
   Future<void> _handleShake() async {
     _canShake = false;
-    
+
     // Haptic Feedback
     await HapticFeedback.heavyImpact();
 

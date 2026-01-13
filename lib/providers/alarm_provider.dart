@@ -61,9 +61,9 @@ class AlarmProvider extends ChangeNotifier {
 
   /// [Private Helper] 알람 등록 로직 단순화
   Future<void> _scheduleNotification(Alarm alarm) async {
-    // Payload format: alarm|id|hour|minute|sound|volume
+    // Payload format: alarm|id|hour|minute|sound|volume|duration|snooze|missionType
     final String notificationPayload =
-        "alarm|${alarm.id}|${alarm.hour}|${alarm.minute}|${alarm.soundFileName}|${alarm.volume}|${alarm.duration}|${alarm.snoozeCount}";
+        "alarm|${alarm.id}|${alarm.hour}|${alarm.minute}|${alarm.soundFileName}|${alarm.volume}|${alarm.duration}|${alarm.snoozeCount}|${alarm.missionType.index}";
 
     await NotificationService().scheduleAlarm(
       alarmId: alarm.id.hashCode,

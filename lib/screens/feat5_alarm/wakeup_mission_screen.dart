@@ -3,6 +3,7 @@ import '../../models/alarm_model.dart';
 import 'alarm_result_screen.dart';
 import '../../widgets/missions/mission_math.dart';
 import '../../widgets/missions/mission_shake.dart';
+import '../../widgets/missions/mission_step_badge.dart';
 
 class WakeupMissionScreen extends StatefulWidget {
   final MissionType missionType;
@@ -121,27 +122,14 @@ class _StepHeader extends StatelessWidget {
 
     Widget circle(int n) {
       final bool active = n <= current;
-      return Container(
-        width: 34,
-        height: 34,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: active ? const Color(0xFF7C3AED) : const Color(0xFFD9C7FF),
-        ),
-        child: Text(
-          n.toString().padLeft(2, '0'),
-          style: TextStyle(
-            color: active ? Colors.white : const Color(0xFF5B4B7A),
-            fontFamily: 'HYkanB',
-            fontSize: 14,
-          ),
-        ),
+      return MissionStepBadge(
+        step: n,
+        isActive: active,
       );
     }
 
     return SizedBox(
-      height: 34,
+      height: 40,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(), // 스크롤 막고 싶으면 유지

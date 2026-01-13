@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/design_system_buttons.dart';
 import '../../widgets/gallery_detail_popup.dart';
+import 'package:provider/provider.dart';
+import '../../models/alarm_history.dart';
+import '../../providers/history_provider.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -23,97 +26,44 @@ class GalleryItem {
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
-  // Dummy data with Score and Timestamp for sorting
-  late List<GalleryItem> _items;
+  // Dummy data removed. We now fetch from Provider.
   bool _isSortByScore = false; // Default: Latest (false)
 
   @override
   void initState() {
     super.initState();
-    _items = [
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-pepe.png',
-        score: 1,
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-math.png',
-        score: 5,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-shake.png',
-        score: 3,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-write.png',
-        score: 5,
-        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-colors.png',
-        score: 2,
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-sound.png',
-        score: 4,
-        timestamp: DateTime.now().subtract(const Duration(days: 0, hours: 5)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-record.png',
-        score: 5,
-        timestamp: DateTime.now(),
-      ), // Just now
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-gallery.png',
-        score: 3,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-list.png',
-        score: 1,
-        timestamp: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-alarm.png',
-        score: 4,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 50)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-alarm.png',
-        score: 5,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-      ),
-      GalleryItem(
-        imagePath: 'assets/illusts/illust-pepe.png',
-        score: 2,
-        timestamp: DateTime.now().subtract(const Duration(hours: 10)),
-      ),
-    ];
-    _sortItems();
+    // No initialization of dummy data needed
   }
 
-  void _sortItems() {
-    setState(() {
-      if (_isSortByScore) {
-        // Sort by Score (Desc) then Time (Desc)
-        _items.sort((a, b) {
-          int scoreComp = b.score.compareTo(a.score);
-          if (scoreComp != 0) return scoreComp;
-          return b.timestamp.compareTo(a.timestamp);
-        });
-      } else {
-        // Sort by Time (Desc)
-        _items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      }
-    });
+  List<GalleryItem> _getSortedItems(List<AlarmHistory> historyList) {
+    // Convert History to Gallery Items (Filtering out ones without images if needed)
+    final items = historyList
+        .where((h) => h.imagePath.isNotEmpty)
+        .map((h) => GalleryItem(
+              imagePath: h.imagePath,
+              score: h.score,
+              timestamp: h.timestamp,
+            ))
+        .toList();
+
+    if (_isSortByScore) {
+      items.sort((a, b) {
+        int scoreComp = b.score.compareTo(a.score);
+        if (scoreComp != 0) return scoreComp;
+        return b.timestamp.compareTo(a.timestamp);
+      });
+    } else {
+      // Default Latest
+      items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    }
+    
+    return items;
   }
 
   void _onSortPressed() {
-    _isSortByScore = !_isSortByScore;
-    _sortItems();
+    setState(() {
+      _isSortByScore = !_isSortByScore;
+    });
   }
 
   Widget _buildHeader() {
@@ -184,36 +134,47 @@ class _GalleryScreenState extends State<GalleryScreen> {
           children: [
             _buildHeader(),
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(20),
-                itemCount: _items.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // 3 columns
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 1.0, // Square
-                ),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => GalleryDetailPopup(item: _items[index]),
+              child: Consumer<HistoryProvider>(
+                builder: (context, provider, child) {
+                  final items = _getSortedItems(provider.historyList);
+
+                  if (items.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "아직 저장된 기상 기록이 없어요!",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: items.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, // 3 columns
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 1.0, // Square
+                    ),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => GalleryDetailPopup(item: items[index]),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            image: DecorationImage(
+                              image: AssetImage(items[index].imagePath),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                       );
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        border: Border.all(
-                          color: const Color(0xFF2E2E3E),
-                          width: 2,
-                        ),
-                        image: DecorationImage(
-                          image: AssetImage(_items[index].imagePath),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
                   );
                 },
               ),
