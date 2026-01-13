@@ -184,7 +184,7 @@ class AlarmCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4), // More space before label
                         Text(
-                          alarm.label.isEmpty ? '평일' : alarm.label,
+                          alarm.label.isEmpty ? '알람' : alarm.label,
                           style: const TextStyle(
                             color: AppColors.baseWhite,
                             fontSize: 18,
