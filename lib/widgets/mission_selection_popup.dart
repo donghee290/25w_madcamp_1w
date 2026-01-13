@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import '../models/alarm_model.dart';
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
-import 'design_system_buttons.dart';
+import 'mission_difficulty_selection_popup.dart';
 
 class MissionSelectionPopup extends StatefulWidget {
   final MissionType initialType;
   final String? initialPayload;
   final int initialDifficulty;
+  final int initialCount;
 
   const MissionSelectionPopup({
     super.key,
     required this.initialType,
     required this.initialPayload,
     required this.initialDifficulty,
+    required this.initialCount,
   });
 
   @override
@@ -22,50 +24,100 @@ class MissionSelectionPopup extends StatefulWidget {
 
 class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
   late MissionType _selectedType;
-  String? _selectedPayload;
   late int _selectedDifficulty;
+  late int _selectedCount;
 
-  late final List<_MissionOption> _options = [
-    _MissionOption(
-      title: "수학 문제",
-      type: MissionType.math,
-      payload: "mission=math",
-      defaultDifficulty: 1,
-    ),
-    _MissionOption(
-      title: "색깔 타일 찾기",
-      type: MissionType.colors,
-      payload: "mission=colors",
-      defaultDifficulty: 1,
-    ),
-    _MissionOption(
-      title: "따라쓰기",
-      type: MissionType.write,
-      payload: "mission=write",
-      defaultDifficulty: 1,
-    ),
-    _MissionOption(
-      title: "흔들기",
-      type: MissionType.shake,
-      payload: "mission=shake",
-      defaultDifficulty: 1,
-    ),
+  late final Map<MissionType, int> _difficultyByType;
+  late final Map<MissionType, int> _countByType;
+
+  final List<MissionType> _types = const [
+    MissionType.math,
+    MissionType.colors,
+    MissionType.write,
+    MissionType.shake,
   ];
 
   @override
   void initState() {
     super.initState();
     _selectedType = widget.initialType;
-    _selectedPayload = widget.initialPayload;
     _selectedDifficulty = widget.initialDifficulty;
+    _selectedCount = widget.initialCount;
+
+    _difficultyByType = {
+      MissionType.math: 1,
+      MissionType.colors: 1,
+      MissionType.write: 1,
+      MissionType.shake: 0,
+    };
+
+    _countByType = {
+      MissionType.math: 2,
+      MissionType.colors: 2,
+      MissionType.write: 2,
+      MissionType.shake: 5,
+    };
+
+    _difficultyByType[_selectedType] = widget.initialDifficulty;
+    _countByType[_selectedType] = widget.initialCount;
+
+    _selectedDifficulty = _difficultyByType[_selectedType]!;
+    _selectedCount = _countByType[_selectedType]!;
   }
 
-  bool _isSelected(_MissionOption opt) {
-    return opt.type == _selectedType;
+  String _titleOf(MissionType type) {
+    switch (type) {
+      case MissionType.math:
+        return "수학 문제";
+      case MissionType.colors:
+        return "색깔 타일 찾기";
+      case MissionType.write:
+        return "따라쓰기";
+      case MissionType.shake:
+        return "흔들기";
+    }
   }
 
   String _iconOf(MissionType type) {
     return "assets/illusts/illust-${type.name}.png";
+  }
+
+  Future<void> _openDetail(MissionType type) async {
+    setState(() {
+      _selectedType = type;
+    });
+
+    final result = await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => MissionDifficultySelectionPopup(
+        type: type,
+        initialDifficulty: _difficultyByType[type]!,
+        initialCount: _countByType[type]!,
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (result != null && result is Map) {
+      final MissionType newType = result['missionType'] as MissionType? ?? type;
+      final int newDifficulty =
+          result['missionDifficulty'] as int? ?? _selectedDifficulty;
+      final int newCount = result['missionCount'] as int? ?? _selectedCount;
+      final String? newPayload = result['payload'] as String?;
+
+      _difficultyByType[newType] = newDifficulty;
+      _countByType[newType] = newCount;
+
+      Navigator.of(context).pop({
+        'missionType': newType,
+        'missionDifficulty': newDifficulty,
+        'missionCount': newCount,
+        'payload': newPayload,
+        'missionName': _titleOf(newType),
+      });
+    }
   }
 
   @override
@@ -111,17 +163,9 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
           Expanded(
             child: SingleChildScrollView(
               child: Column(
-                children: _options.map((opt) {
-                  final selected = _isSelected(opt);
-
+                children: _types.map((type) {
                   return SkyblueListItem(
-                    onTap: () {
-                      setState(() {
-                        _selectedType = opt.type;
-                        _selectedPayload = opt.payload;
-                        _selectedDifficulty = opt.defaultDifficulty;
-                      });
-                    },
+                    onTap: () => _openDetail(type),
                     child: Column(
                       children: [
                         Container(
@@ -129,15 +173,11 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
                           alignment: Alignment.centerLeft,
                           child: Row(
                             children: [
-                              Image.asset(
-                                _iconOf(opt.type),
-                                width: 28,
-                                height: 28,
-                              ),
+                              Image.asset(_iconOf(type), width: 28, height: 28),
                               const SizedBox(width: 15),
                               Expanded(
                                 child: Text(
-                                  opt.title,
+                                  _titleOf(type),
                                   style: const TextStyle(
                                     fontFamily: 'HYkanB',
                                     fontSize: 18,
@@ -148,19 +188,6 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
                             ],
                           ),
                         ),
-
-                        // 선택 강조선 (원하시면 제거 가능)
-                        if (selected)
-                          Container(
-                            color: const Color(
-                              0xFF396DA9,
-                            ).withValues(alpha: 0.5),
-                            height: 1,
-                            margin: const EdgeInsets.only(bottom: 8),
-                          ),
-
-                        // 난이도 UI가 필요하면 여기서 확장 가능
-                        // (현재 디자인 스샷에는 없어서 기본값만 세팅)
                       ],
                     ),
                   );
@@ -168,48 +195,9 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
               ),
             ),
           ),
-
-          //Footer
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-            child: YellowMainButton(
-              label: "이 미션으로 결정하기",
-              width: double.infinity,
-              height: 50,
-              onTap: () {
-                Navigator.of(context).pop({
-                  'missionType': _selectedType,
-                  'missionDifficulty': _selectedDifficulty,
-                  'payload': _selectedPayload,
-                  'missionName': _selectedMissionName(),
-                });
-              },
-            ),
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
-
-  String _selectedMissionName() {
-    //UI 표시용 이름
-    for (final o in _options) {
-      if (_isSelected(o)) return o.title;
-    }
-    return "미션을 선택해주세요.";
-  }
-}
-
-class _MissionOption {
-  final String title;
-  final MissionType type;
-  final String? payload;
-  final int defaultDifficulty;
-
-  _MissionOption({
-    required this.title,
-    required this.type,
-    required this.payload,
-    required this.defaultDifficulty,
-  });
 }

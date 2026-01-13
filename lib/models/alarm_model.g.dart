@@ -26,6 +26,7 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       weekdays: (fields[6] as List).cast<int>(),
       missionType: fields[7] as MissionType,
       missionDifficulty: fields[8] as int,
+      missionCount: fields[13] as int,
       soundFileName: fields[9] as String,
       duration: fields[10] as int,
       snoozeCount: fields[11] as int,
@@ -36,7 +37,7 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
   @override
   void write(BinaryWriter writer, Alarm obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +63,9 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       ..writeByte(11)
       ..write(obj.snoozeCount)
       ..writeByte(12)
-      ..write(obj.payload);
+      ..write(obj.payload)
+      ..writeByte(13)
+      ..write(obj.missionCount);
   }
 
   @override

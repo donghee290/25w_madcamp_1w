@@ -36,12 +36,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
-  bool _isSoundSliderVisible = false; // Initial state: hidden
-
-  String _missionName = "미션을 선택해주세요.";
+  String _missionName = "수학 문제";
   MissionType _missionType = MissionType.math;
-  int _missionDifficulty = 1;
   String? _missionPayload;
+  int _missionDifficulty = 1;
+  int _missionCount = 2;
 
   // Settings
   bool _isVibration = true;
@@ -68,6 +67,45 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     return "assets/illusts/illust-${type.name}.png";
   }
 
+  String _difficultyLabel(MissionType type, int diff) {
+    if (type == MissionType.math) {
+      switch (diff) {
+        case 1:
+          return "매우 쉬움";
+        case 2:
+          return "쉬움";
+        case 3:
+          return "보통";
+        case 4:
+          return "어려움";
+        case 5:
+          return "매우 어려움";
+        default:
+          return "매우 쉬움";
+      }
+    }
+    if (type == MissionType.colors || type == MissionType.write) {
+      switch (diff) {
+        case 1:
+          return "쉬움";
+        case 2:
+          return "보통";
+        case 3:
+          return "어려움";
+        default:
+          return "쉬움";
+      }
+    }
+    return "-"; //MissionType.shake
+  }
+
+  String _missionSummaryLine() {
+    if (_missionType == MissionType.shake) {
+      return "횟수: $_missionCount회";
+    }
+    return "난이도: ${_difficultyLabel(_missionType, _missionDifficulty)}    횟수: $_missionCount회";
+  }
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +120,9 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       _snoozeCount = a.snoozeCount;
 
       _missionType = a.missionType;
+      _missionPayload = a.payload;
       _missionDifficulty = a.missionDifficulty;
+      _missionCount = a.missionCount;
       _missionName = _missionTitleOf(_missionType);
 
       // Time Logic
@@ -202,9 +242,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       isVibration: _isVibration,
       duration: _duration,
       snoozeCount: _isSnoozeOn ? _snoozeCount : 0,
+      soundFileName: _soundName,
       missionType: _missionType,
       missionDifficulty: _missionDifficulty,
-      soundFileName: _soundName,
+      missionCount: _missionCount,
+      payload: _missionPayload,
     );
 
     if (widget.alarm != null) {
@@ -457,8 +499,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               title,
               style: const TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 16, // 14 -> 16
-                fontFamily: 'HYkanM',
+                fontSize: 15,
+                fontFamily: 'HYkanB',
               ),
             ),
             GestureDetector(
@@ -467,7 +509,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 "설정하러 가기",
                 style: TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 12, // 10 -> 12
+                  fontSize: 12,
                   decoration: TextDecoration.underline,
                   decorationColor: AppColors.baseWhite, // NEW
                   fontFamily: 'HYkanM',
@@ -814,7 +856,6 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
                     _buildBlueBox(
                       "기상 사운드",
-                      // FIX: Display conditional logic for sound name
                       (_soundName.contains('/') ||
                               _soundName.contains(Platform.pathSeparator))
                           ? SoundConstants.customRecordingKey
@@ -885,6 +926,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                             initialType: _missionType,
                             initialPayload: _missionPayload,
                             initialDifficulty: _missionDifficulty,
+                            initialCount: _missionCount,
                           ),
                         );
 
@@ -893,13 +935,28 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                             _missionType = result['missionType'] as MissionType;
                             _missionDifficulty =
                                 result['missionDifficulty'] as int;
+                            _missionCount = result['missionCount'] as int;
+                            _missionPayload = result['payload'] as String?;
                             _missionName = result['missionName'] as String;
                           });
                         }
                       },
                     ),
 
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                        _missionSummaryLine(),
+                        style: const TextStyle(
+                          color: Color(0xFFD9D9D9),
+                          fontSize: 12,
+                          fontFamily: 'HYkanM',
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 25),
+
                     _buildCustomSettings(),
 
                     const SizedBox(height: 40),
