@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import 'design_system_layouts.dart';
 import 'design_system_buttons.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:bullshit/widgets/recording_overlay.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../constants/sound_constants.dart';
@@ -27,9 +28,18 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   late double _volume;
   ui.Image? _sliderThumbImage;
   String? _customRecordingPath;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  String? _customAudioPath;
 
-  final List<String> _soundOptions = SoundConstants.soundOptions;
+  final List<String> _soundOptions = [
+    "엘지 굿모닝송",
+    "일어나셔야 합니다",
+    "군대 기상 나팔",
+    "이성을 끌어당기는 주파수",
+    "성적이 오르는 주파수",
+    "일어나는 건 박수받아 마땅함",
+    "직접 녹음하기",
+    "내 오디오 가져오기",
+  ];
 
   @override
   void initState() {
@@ -38,9 +48,11 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
     _selectedSound = ''; 
     _volume = widget.initialVolume;
 
-    // We don't pre-select logic anymore
-    // but we can keep _customRecordingPath null
-    _customRecordingPath = null;
+    // Check if initial sound is likely a file path
+    if (_selectedSound.contains('/') || _selectedSound.contains('\\')) {
+      _customRecordingPath = _selectedSound;
+      _selectedSound = "직접 녹음하기";
+    }
 
     _loadSliderThumbImage();
   }
@@ -109,13 +121,29 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 Navigator.of(context).pop();
                 setState(() {
                   _customRecordingPath = path;
-                  _selectedSound = SoundConstants.customRecordingKey;
+                  _selectedSound = "직접 녹음하기";
                 });
-                _playSound(SoundConstants.customRecordingKey);
               },
             ),
       ),
     );
+  }
+
+  Future<void> _pickAudioFromDevice() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      allowedExtensions: ['mp3', 'm4a', 'wav', 'aac', 'ogg', 'flac'],
+    );
+
+    final path = result?.files.single.path;
+    if (path == null) return;
+
+    setState(() {
+      _customAudioPath = path;
+      _customRecordingPath = null;
+      _selectedSound = "내 오디오 가져오기";
+    });
   }
 
   @override
@@ -163,32 +191,24 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
               child: Column(
                 children: _soundOptions.map((sound) {
                   final isSelected = sound == _selectedSound;
-                  final isRecording =
-                      sound == SoundConstants.customRecordingKey;
-                  final iconAsset = isRecording
+                  final isRecordIcon =
+                      sound == "직접 녹음하기" || sound == "내 오디오 가져오기";
+                  final iconAsset = isRecordIcon
                       ? "assets/illusts/illust-record.png"
                       : "assets/illusts/illust-sound.png";
 
                   return SkyblueListItem(
                     onTap: () {
-                      if (isRecording) {
+                      if (sound == "직접 녹음하기") {
                         _showRecordingOverlay();
+                      } else if (sound == "내 오디오 가져오기") {
+                        _pickAudioFromDevice();
                       } else {
-                        if (isSelected) {
-                          // Toggle Off Logic: Stop and Deselect
-                          _audioPlayer.stop();
-                          setState(() {
-                             _selectedSound = ''; // Deselect
-                             _customRecordingPath = null;
-                          });
-                        } else {
-                          // Select and Play
-                          setState(() {
-                            _selectedSound = sound;
-                            _customRecordingPath = null;
-                          });
-                          _playSound(sound);
-                        }
+                        setState(() {
+                          _selectedSound = sound;
+                          _customRecordingPath = null;
+                          _customAudioPath = null;
+                        });
                       }
                     },
                     child: Column(
@@ -214,27 +234,17 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                             ],
                           ),
                         ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: isSelected
-                              ? Column(
-                                  children: [
-                                    Container(
-                                      color: const Color(
-                                        0xFF396DA9,
-                                      ).withValues(alpha: 0.5),
-                                      height: 1,
-                                      margin: const EdgeInsets.symmetric(
-                                        vertical: 5,
-                                      ),
-                                    ),
-                                    SizedBox(height: 40, child: _buildSlider()),
-                                    const SizedBox(height: 5),
-                                  ],
-                                )
-                              : const SizedBox.shrink(),
-                        ),
+                        if (isSelected) ...[
+                          Container(
+                            color: const Color(
+                              0xFF396DA9,
+                            ).withValues(alpha: 0.5),
+                            height: 1,
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                          ),
+                          SizedBox(height: 40, child: _buildSlider()),
+                          const SizedBox(height: 5),
+                        ],
                       ],
                     ),
                   );
@@ -259,12 +269,13 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 // Yes, usually "Confirm" means "Apply changes". If no change, keep old.
                 
                 String resultSound = _selectedSound;
-                
-                if (resultSound.isEmpty) {
-                   resultSound = widget.initialSound;
-                } else if (_selectedSound == SoundConstants.customRecordingKey &&
+                if (_selectedSound == "직접 녹음하기" &&
                     _customRecordingPath != null) {
                   resultSound = _customRecordingPath!;
+                }
+                if (_selectedSound == "내 오디오 가져오기" &&
+                    _customAudioPath != null) {
+                  resultSound = _customAudioPath!;
                 }
 
                 Navigator.of(
@@ -281,48 +292,28 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   Widget _buildSlider() {
     return Row(
       children: [
-        const Text(
-          "0",
-          style: TextStyle(
-            color: Color(0xFFC8C8C8),
-            fontSize: 12,
-            fontFamily: 'HYkanM',
+        // Background Track
+        Container(
+          height: 24, // Slightly smaller than create screen
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF6E6E7E)),
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Background Track
-              Container(
-                height: 12, // 24 -> 12 (Half)
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
-                  ),
-                  borderRadius: BorderRadius.circular(6), // 12 -> 6
-                  border: Border.all(color: const Color(0xFF6E6E7E)),
-                ),
-              ),
-              // Slider
-              SliderTheme(
-                data: SliderThemeData(
-                  trackHeight: 2,
-                  activeTrackColor: Colors.transparent,
-                  inactiveTrackColor: Colors.transparent,
-                  thumbShape: _CustomThumbShape(image: _sliderThumbImage),
-                  overlayShape: SliderComponentShape.noOverlay,
-                ),
-                child: Slider(
-                  value: _volume,
-                  onChanged: (v) => setState(() => _volume = v),
-                ),
-              ),
-            ],
+        // Slider
+        SliderTheme(
+          data: SliderThemeData(
+            trackHeight: 2,
+            activeTrackColor: Colors.transparent,
+            inactiveTrackColor: Colors.transparent,
+            thumbShape: _CustomThumbShape(image: _sliderThumbImage),
+            overlayShape: SliderComponentShape.noOverlay,
           ),
         ),
         const SizedBox(width: 8),

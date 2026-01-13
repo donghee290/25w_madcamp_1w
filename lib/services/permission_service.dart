@@ -30,14 +30,24 @@ class PermissionService extends ChangeNotifier {
       final camOk = (await Permission.camera.request()).isGranted;
       if (!camOk) return false;
 
-      //4. Overlay
+      //4. Audio (Media Audio)
+      if (Platform.isAndroid) {
+        final audioOk = (await Permission.audio.request()).isGranted;
+
+        if (!audioOk) {
+          final storageOk = (await Permission.storage.request()).isGranted;
+          if (!storageOk) return false;
+        }
+      }
+
+      //5. Overlay
       if (Platform.isAndroid) {
         await Permission.systemAlertWindow.request();
         final overlayOk = (await Permission.systemAlertWindow.status).isGranted;
         if (!overlayOk) return false;
       }
 
-      //5. Exact Alarm
+      //6. Exact Alarm
       if (Platform.isAndroid) {
         await Permission.scheduleExactAlarm.request();
         final exactOk = (await Permission.scheduleExactAlarm.status).isGranted;
