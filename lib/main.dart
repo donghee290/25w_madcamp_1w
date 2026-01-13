@@ -80,26 +80,47 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handlePayload(String payload) {
-    // Payload: id|duration|hour|minute
     final parts = payload.split('|');
-    if (parts.length >= 4) {
-      final int hour = int.parse(parts[2]);
-      final int minute = int.parse(parts[3]);
+    if (parts.length < 2) return;
 
-      // Schedule post-frame to ensure navigator is ready
+    final alarmId = parts[1];
+
+    final alarmBox = Hive.box<Alarm>('alarmBox');
+    final Alarm? alarm = alarmBox.get(alarmId);
+
+    if (alarm == null) {
+      int hour = 0;
+      int minute = 0;
+      if (parts.length >= 4) {
+        hour = int.tryParse(parts[2]) ?? 0;
+        minute = int.tryParse(parts[3]) ?? 0;
+      }
+
+      final fallbackAlarm = Alarm(
+        id: alarmId,
+        label: '',
+        hour: hour,
+        minute: minute,
+        payload: payload,
+      );
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         navigatorKey.currentState?.push(
           MaterialPageRoute(
-            builder:
-                (context) => AlarmTriggerScreen(
-                  scheduledHour: hour,
-                  scheduledMinute: minute,
-                  payload: payload,
-                ),
+            builder: (_) => AlarmTriggerScreen(alarm: fallbackAlarm),
           ),
         );
       });
+      return;
     }
+
+    alarm.payload = payload;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => AlarmTriggerScreen(alarm: alarm)),
+      );
+    });
   }
 
   void _configureSelectNotificationSubject() {

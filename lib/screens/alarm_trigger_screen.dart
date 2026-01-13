@@ -5,22 +5,16 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../models/alarm_model.dart';
 import '../constants/sound_constants.dart';
 import '../theme/app_colors.dart';
 import '../widgets/design_system_buttons.dart';
-import 'alarm_result_screen.dart';
+import 'wakeup_mission_screen.dart';
 
 class AlarmTriggerScreen extends StatefulWidget {
-  final int scheduledHour;
-  final int scheduledMinute;
-  final String? payload;
+  final Alarm alarm;
 
-  const AlarmTriggerScreen({
-    super.key,
-    required this.scheduledHour,
-    required this.scheduledMinute,
-    this.payload,
-  });
+  const AlarmTriggerScreen({super.key, required this.alarm});
 
   @override
   State<AlarmTriggerScreen> createState() => _AlarmTriggerScreenState();
@@ -71,13 +65,16 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   }
 
   void _parsePayload() {
-    if (widget.payload != null) {
-      final parts = widget.payload!.split('|');
-      // alarm|id|hour|minute|sound|volume
+    final payload = widget.alarm.payload;
+    if (payload != null) {
+      final parts = payload.split('|');
       if (parts.length >= 6) {
         _soundName = parts[4];
         _volume = double.tryParse(parts[5]) ?? 0.5;
       }
+    } else {
+      _soundName = widget.alarm.soundFileName;
+      _volume = widget.alarm.volume;
     }
   }
 
@@ -132,15 +129,18 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
     _playAlarmSound();
   }
 
-  void _handleWakeUp() {
+  void _handleStartMission() {
     _audioPlayer.stop();
-    // Navigate to Result Screen
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => AlarmResultScreen(
-          scheduledHour: widget.scheduledHour,
-          scheduledMinute: widget.scheduledMinute,
-          payload: widget.payload,
+        builder: (_) => WakeupMissionScreen(
+          missionType: widget.alarm.missionType,
+          missionDifficulty: widget.alarm.missionDifficulty,
+          missionCount: widget.alarm.missionCount,
+          alarmId: widget.alarm.id,
+          scheduledHour: widget.alarm.hour,
+          scheduledMinute: widget.alarm.minute,
         ),
       ),
     );
@@ -221,7 +221,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
                           label: "지금 기상하기",
                           width: double.infinity,
                           height: 60,
-                          onTap: _handleWakeUp,
+                          onTap: _handleStartMission,
                         ),
                       ),
                     ],
@@ -233,8 +233,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
                       children: [
                         // Snooze Button
                         GrayButton(
-                          label:
-                              "5분 미루기", // Fixed for now, can be dynamic later
+                          label: "5분 미루기",
                           width: double.infinity,
                           height: 60,
                           onTap: _handleSnooze,
@@ -245,7 +244,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
                           label: "미션 시작하기",
                           width: double.infinity,
                           height: 60,
-                          onTap: _handleWakeUp, // Navigates to Result (Mission)
+                          onTap: _handleStartMission,
                         ),
                       ],
                     ),
