@@ -130,12 +130,20 @@ class _MissionDifficultySelectionPopupState
           3 => "동해물과 백두산이 마르고 닳도록\n하느님이 보우하사 우리나라 만세...",
           _ => "아이스크림",
         };
+        final double writeExampleFontSize = switch (_difficulty) {
+          1 => 24,
+          2 => 20,
+          3 => 16,
+          _ => 24,
+        };
         inner = Text(
           phrase,
-          style: const TextStyle(
+          textAlign: TextAlign.center,
+          style: TextStyle(
             fontFamily: 'HYkanB',
-            fontSize: 22,
+            fontSize: writeExampleFontSize,
             color: Colors.black,
+            height: 1.2,
           ),
         );
         break;
@@ -161,15 +169,17 @@ class _MissionDifficultySelectionPopupState
       ),
       child: Column(
         children: [
-          const Text(
-            "예제",
-            style: TextStyle(
-              fontFamily: 'HYkanB',
-              fontSize: 16,
-              color: Colors.black,
+          if (type != MissionType.shake) ...[
+            const Text(
+              "예제",
+              style: TextStyle(
+                fontFamily: 'HYkanB',
+                fontSize: 16,
+                color: Colors.black,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
           Center(child: inner),
         ],
       ),
