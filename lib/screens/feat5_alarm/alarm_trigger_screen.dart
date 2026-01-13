@@ -140,7 +140,9 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   }
 
   void _handleStartMission() {
-    // _audioPlayer.stop(); // Removed to keep music playing
+    // If coming from Snooze (or just to be safe), ensure sound is playing
+    _snoozeTimer?.cancel();
+    _playAlarmSound(); 
 
     Navigator.of(context).push(
       MaterialPageRoute(

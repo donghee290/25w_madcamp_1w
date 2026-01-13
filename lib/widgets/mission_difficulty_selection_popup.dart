@@ -254,7 +254,7 @@ class _MissionDifficultySelectionPopupState
     final countOpts = _countOptions(type);
 
     return PopupBig(
-      height: 520,
+      height: 600, // Increased from 520
       width: double.infinity,
       child: Column(
         children: [

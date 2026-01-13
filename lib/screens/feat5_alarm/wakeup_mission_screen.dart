@@ -55,14 +55,17 @@ class _WakeupMissionScreenState extends State<WakeupMissionScreen> {
     });
 
     if (_remaining <= 0) {
-      Navigator.of(context).pushReplacement(
+    if (_remaining <= 0) {
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (_) => AlarmResultScreen(
             scheduledHour: widget.scheduledHour,
             scheduledMinute: widget.scheduledMinute,
           ),
         ),
+        (route) => false, // Clear all previous routes
       );
+    }
     }
   }
 

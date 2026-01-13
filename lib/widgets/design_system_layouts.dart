@@ -58,7 +58,7 @@ class PopupBig extends StatelessWidget {
     super.key,
     required this.child,
     this.width = 360,
-    this.height = 518,
+    this.height = 600,
   });
 
   @override

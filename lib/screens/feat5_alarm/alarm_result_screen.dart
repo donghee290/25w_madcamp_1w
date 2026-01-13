@@ -8,6 +8,7 @@ import '../../widgets/design_system_buttons.dart';
 import 'package:intl/intl.dart';
 import '../../models/alarm_model.dart';
 import '../../providers/alarm_provider.dart';
+import '../main_screen.dart';
 
 class AlarmResultScreen extends StatefulWidget {
   final int scheduledHour;
@@ -340,7 +341,9 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
                    ).addHistory(historyEntry);
 
                    if (context.mounted) {
-                     Navigator.of(context).pop(); 
+                     Navigator.of(context).pushReplacement(
+                       MaterialPageRoute(builder: (_) => const MainScreen()),
+                     ); 
                    }
                 },
               ),

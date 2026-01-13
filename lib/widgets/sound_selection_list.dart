@@ -37,9 +37,26 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
   @override
   void initState() {
     super.initState();
-    _selectedSound = widget.initialSound;
     _volume = widget.initialVolume;
     _loadSliderThumbImage();
+
+    // Restore selection state
+    if (_soundOptions.contains(widget.initialSound)) {
+      _selectedSound = widget.initialSound;
+    } else if (widget.initialSound.isNotEmpty) {
+      // Must be a custom path (file path)
+      // Check if it's a recording vs imported audio? 
+      // For now, assume imported audio or check usage.
+      // If we don't distinguish, default to My Audio as user reported that one.
+      // Ideally we check if file exists, but for UI state we just set it.
+      
+      // Simple logic: If it's a path, treat as "My Audio" to show that option selected.
+      // If we supported recording persistence better we'd check path location.
+      _selectedSound = SoundConstants.myAudioKey;
+      _customAudioPath = widget.initialSound;
+    } else {
+      _selectedSound = "";
+    }
   }
 
   @override

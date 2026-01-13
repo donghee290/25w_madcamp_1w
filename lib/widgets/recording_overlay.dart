@@ -230,7 +230,7 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
           left: 20,
           right: 20,
           child: PopupSmall(
-            height: 156, // Adjust height
+            height: 200, // Increased from 156
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -297,7 +297,7 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: PopupSmall(
-          height: 250, // Adjust appropriately
+          height: 320, // Increased from 250
           child: Column(
             children: [
               // Header Close Button
