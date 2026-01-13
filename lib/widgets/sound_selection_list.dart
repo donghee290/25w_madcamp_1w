@@ -30,6 +30,8 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
   String? _customRecordingPath;
   String? _customAudioPath;
 
+  bool _sliderOpened = false;
+
   ui.Image? _sliderThumbImage;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final List<String> _soundOptions = SoundConstants.soundOptions;
@@ -40,23 +42,16 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     _volume = widget.initialVolume;
     _loadSliderThumbImage();
 
-    // Restore selection state
     if (_soundOptions.contains(widget.initialSound)) {
       _selectedSound = widget.initialSound;
     } else if (widget.initialSound.isNotEmpty) {
-      // Must be a custom path (file path)
-      // Check if it's a recording vs imported audio? 
-      // For now, assume imported audio or check usage.
-      // If we don't distinguish, default to My Audio as user reported that one.
-      // Ideally we check if file exists, but for UI state we just set it.
-      
-      // Simple logic: If it's a path, treat as "My Audio" to show that option selected.
-      // If we supported recording persistence better we'd check path location.
       _selectedSound = SoundConstants.myAudioKey;
       _customAudioPath = widget.initialSound;
     } else {
       _selectedSound = "";
     }
+
+    _sliderOpened = false;
   }
 
   @override
@@ -208,68 +203,65 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
         final isSelected = sound == _selectedSound;
         final isRecording = sound == SoundConstants.customRecordingKey;
         final isMyAudio = sound == SoundConstants.myAudioKey;
+        final showSlider = isSelected && _sliderOpened;
 
         final iconAsset = (isRecording || isMyAudio)
             ? "assets/illusts/illust-record.png"
             : "assets/illusts/illust-sound.png";
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: SkyblueListItem(
-            onTap: () {
-              if (isRecording) {
-                _showRecordingOverlay();
-              } else if (isMyAudio) {
-                _pickAudioFromDevice();
-              } else {
-                if (isSelected) {
-                  _audioPlayer.stop();
-                  setState(() {
-                    _selectedSound = ''; // Deselect
-                  });
-                  widget.onSelectionChanged('', _volume);
-                } else {
-                  _updateSelection(sound);
-                }
-              }
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 50,
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    children: [
-                      Image.asset(iconAsset, width: 24, height: 24),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(
-                          sound,
-                          style: const TextStyle(
-                            fontFamily: 'HYkanB',
-                            fontSize: 16,
-                            color: Color(0xFF5882B4),
-                          ),
+        return SkyblueListItem(
+          onTap: () {
+            if (isRecording) {
+              _showRecordingOverlay();
+              return;
+            }
+            if (isMyAudio) {
+              _pickAudioFromDevice();
+              return;
+            }
+
+            if (isSelected) {
+              setState(() => _sliderOpened = !_sliderOpened);
+            } else {
+              setState(() {
+                _sliderOpened = true;
+              });
+              _updateSelection(sound);
+            }
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 50,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    Image.asset(iconAsset, width: 24, height: 24),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        sound,
+                        style: const TextStyle(
+                          fontFamily: 'HYkanB',
+                          fontSize: 18,
+                          color: Color(0xFF5882B4),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: isSelected
-                      ? Column(
-                          children: [
-                            SizedBox(height: 40, child: _buildSlider()),
-                            const SizedBox(height: 5),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: showSlider
+                    ? Column(
+                        children: [SizedBox(height: 40, child: _buildSlider())],
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ],
           ),
         );
       }).toList(),
@@ -279,15 +271,6 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
   Widget _buildSlider() {
     return Row(
       children: [
-        const Text(
-          "0",
-          style: TextStyle(
-            color: Color(0xFFC8C8C8),
-            fontSize: 12,
-            fontFamily: 'HYkanM',
-          ),
-        ),
-        const SizedBox(width: 8),
         Expanded(
           child: Stack(
             alignment: Alignment.center,
@@ -314,7 +297,9 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
                   overlayShape: SliderComponentShape.noOverlay,
                 ),
                 child: Slider(
-                  value: _volume,
+                  min: 0.0,
+                  max: 1.0,
+                  value: _volume.clamp(0.0, 1.0),
                   onChanged: (v) {
                     setState(() => _volume = v);
                     _audioPlayer.setVolume(v);
@@ -323,15 +308,6 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
                 ),
               ),
             ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        const Text(
-          "100",
-          style: TextStyle(
-            color: Color(0xFFC8C8C8),
-            fontSize: 12,
-            fontFamily: 'HYkanM',
           ),
         ),
       ],

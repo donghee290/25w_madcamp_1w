@@ -42,10 +42,8 @@ class _FirstAlarmStep1ScreenState extends State<FirstAlarmStep1Screen> {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => FirstAlarmStep2Screen(
-          hour: hour24,
-          minute: _selectedMinute,
-        ),
+        builder: (_) =>
+            FirstAlarmStep2Screen(hour: hour24, minute: _selectedMinute),
       ),
     );
   }
@@ -77,7 +75,7 @@ class _FirstAlarmStep1ScreenState extends State<FirstAlarmStep1Screen> {
     );
 
     return SizedBox(
-      height: 140,
+      height: 200,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -94,7 +92,8 @@ class _FirstAlarmStep1ScreenState extends State<FirstAlarmStep1Screen> {
               },
               children: List.generate(
                 12,
-                (index) => Center(child: Text("${index + 1}", style: textStyle)),
+                (index) =>
+                    Center(child: Text("${index + 1}", style: textStyle)),
               ),
             ),
           ),
@@ -150,38 +149,39 @@ class _FirstAlarmStep1ScreenState extends State<FirstAlarmStep1Screen> {
       body: SafeArea(
         child: Column(
           children: [
-             const SizedBox(height: 50),
-             // Step Badges
-             _buildStepBadges(),
-             const SizedBox(height: 40),
-             
-             // Title
-             const Text(
-               "알람을 언제 울려줄까?",
-               style: TextStyle(
-                 color: AppColors.baseWhite,
-                 fontSize: 24,
-                 fontFamily: 'HYcysM',
-                 fontWeight: FontWeight.w400,
-               ),
-             ),
-             const SizedBox(height: 40),
-             
-             // Time Picker
-             _buildTimePicker(),
-             
-             const Spacer(),
-             
-             // Next Button
-             Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-               child: YellowMainButton(
-                 label: "다음",
-                 onTap: _onNext,
-                 width: double.infinity,
-                 height: 60,
-               ),
-             ),
+            const SizedBox(height: 50),
+            // Step Badges
+            _buildStepBadges(),
+            const SizedBox(height: 40),
+
+            // Title
+            const Text(
+              "알람을 언제 울려줄까?",
+              style: TextStyle(
+                color: AppColors.baseWhite,
+                fontSize: 24,
+                fontFamily: 'HYcysM',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 80),
+
+            // Time Picker
+            _buildTimePicker(),
+
+            const Spacer(flex: 1),
+
+            // Next Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+              child: YellowMainButton(
+                label: "다음",
+                onTap: _onNext,
+                width: double.infinity,
+                height: 60,
+              ),
+            ),
+            const Spacer(flex: 1),
           ],
         ),
       ),

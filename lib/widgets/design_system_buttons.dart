@@ -73,13 +73,18 @@ class BlackMainButton extends StatelessWidget {
               else
                 Icon(icon, size: 52, color: AppColors.baseWhite),
               const SizedBox(height: 3),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.baseWhite,
-                  fontSize: 18,
-                  fontFamily: 'HYkanM',
-                  fontWeight: FontWeight.w400,
+              SizedBox(
+                width: width,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.baseWhite,
+                    fontSize: 14,
+                    fontFamily: 'HYkanB',
+                  ),
                 ),
               ),
             ],
