@@ -7,6 +7,7 @@ import 'design_system_buttons.dart';
 import 'package:bullshit/widgets/recording_overlay.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../constants/sound_constants.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SoundSelectionPopup extends StatefulWidget {
   final String initialSound;
@@ -27,6 +28,7 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   late double _volume;
   ui.Image? _sliderThumbImage;
   String? _customRecordingPath;
+  String? _customAudioPath;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   final List<String> _soundOptions = SoundConstants.soundOptions;
@@ -35,12 +37,13 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
   void initState() {
     super.initState();
     // Start with no selection per user request
-    _selectedSound = ''; 
+    _selectedSound = '';
     _volume = widget.initialVolume;
 
     // We don't pre-select logic anymore
     // but we can keep _customRecordingPath null
     _customRecordingPath = null;
+    _customAudioPath = null;
 
     _loadSliderThumbImage();
   }
@@ -83,6 +86,10 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
           // DeviceFileSource needs string path
           await _audioPlayer.play(DeviceFileSource(_customRecordingPath!));
         }
+      } else if (soundName == SoundConstants.myAudioKey) {
+        if (_customAudioPath != null) {
+          await _audioPlayer.play(DeviceFileSource(_customAudioPath!));
+        }
       } else {
         // Map to asset file
         final fileName = SoundConstants.soundFileMap[soundName];
@@ -116,6 +123,24 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
             ),
       ),
     );
+  }
+
+  Future<void> _pickAudioFromDevice() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      allowedExtensions: ['mp3', 'm4a', 'wav', 'aac', 'ogg', 'flac'],
+    );
+
+    final path = result?.files.single.path;
+    if (path == null) return;
+
+    setState(() {
+      _customAudioPath = path;
+      _customRecordingPath = null;
+      _selectedSound = SoundConstants.myAudioKey;
+    });
+    _playSound(SoundConstants.myAudioKey);
   }
 
   @override
@@ -165,7 +190,9 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                   final isSelected = sound == _selectedSound;
                   final isRecording =
                       sound == SoundConstants.customRecordingKey;
-                  final iconAsset = isRecording
+                  final isMyAudio = sound == SoundConstants.myAudioKey;
+
+                  final iconAsset = (isRecording || isMyAudio)
                       ? "assets/illusts/illust-record.png"
                       : "assets/illusts/illust-sound.png";
 
@@ -173,19 +200,23 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                     onTap: () {
                       if (isRecording) {
                         _showRecordingOverlay();
+                      } else if (isMyAudio) {
+                        _pickAudioFromDevice();
                       } else {
                         if (isSelected) {
                           // Toggle Off Logic: Stop and Deselect
                           _audioPlayer.stop();
                           setState(() {
-                             _selectedSound = ''; // Deselect
-                             _customRecordingPath = null;
+                            _selectedSound = ''; // Deselect
+                            _customRecordingPath = null;
+                            _customAudioPath = null;
                           });
                         } else {
                           // Select and Play
                           setState(() {
                             _selectedSound = sound;
                             _customRecordingPath = null;
+                            _customAudioPath = null;
                           });
                           _playSound(sound);
                         }
@@ -254,17 +285,21 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 // If "직접 녹음하기" is selected, return the local path.
                 // Otherwise return selected sound name.
                 // If nothing selected (empty), return initial sound (User cancelled selection effectively, or kept same)
-                // User request: "Modify to ... nothing selected state". 
-                // Context: If they click "Confirm" without selecting anything, should it keep old sound? 
+                // User request: "Modify to ... nothing selected state".
+                // Context: If they click "Confirm" without selecting anything, should it keep old sound?
                 // Yes, usually "Confirm" means "Apply changes". If no change, keep old.
-                
+
                 String resultSound = _selectedSound;
-                
+
                 if (resultSound.isEmpty) {
-                   resultSound = widget.initialSound;
-                } else if (_selectedSound == SoundConstants.customRecordingKey &&
+                  resultSound = widget.initialSound;
+                } else if (_selectedSound ==
+                        SoundConstants.customRecordingKey &&
                     _customRecordingPath != null) {
                   resultSound = _customRecordingPath!;
+                } else if (_selectedSound == SoundConstants.myAudioKey &&
+                    _customAudioPath != null) {
+                  resultSound = _customAudioPath!;
                 }
 
                 Navigator.of(
@@ -319,7 +354,10 @@ class _SoundSelectionPopupState extends State<SoundSelectionPopup> {
                 ),
                 child: Slider(
                   value: _volume,
-                  onChanged: (v) => setState(() => _volume = v),
+                  onChanged: (v) {
+                    setState(() => _volume = v);
+                    _audioPlayer.setVolume(v);
+                  },
                 ),
               ),
             ],

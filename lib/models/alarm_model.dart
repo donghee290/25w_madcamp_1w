@@ -55,7 +55,7 @@ class Alarm extends HiveObject {
   @HiveField(12)
   String? payload;
 
-  @HiveField(13)
+  @HiveField(13, defaultValue: 2)
   int missionCount;
 
   Alarm({

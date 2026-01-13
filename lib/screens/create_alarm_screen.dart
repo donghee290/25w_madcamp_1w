@@ -36,6 +36,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
+  bool _isSoundSliderVisible = false;
   String _missionName = "수학 문제";
   MissionType _missionType = MissionType.math;
   String? _missionPayload;
@@ -205,8 +206,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       } else {
         // Ensure mapping exists or fallback
         String assetPath = SoundConstants.soundFileMap[soundName] ?? '1.mp3';
-        
-        // AssetSource automatically looks in 'assets/'. 
+
+        // AssetSource automatically looks in 'assets/'.
         // Our map values are just filenames like '1.mp3', so we prepend 'sounds/'.
         await _audioPlayer.play(AssetSource("sounds/$assetPath"));
       }
@@ -214,7 +215,6 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
       debugPrint("Error playing sound: $e");
     }
   }
-
 
   void _saveAlarm() {
     final provider = Provider.of<AlarmProvider>(context, listen: false);
@@ -597,7 +597,10 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 ),
                 child: Slider(
                   value: _volume,
-                  onChanged: (v) => setState(() => _volume = v),
+                  onChanged: (v) {
+                    setState(() => _volume = v);
+                    _audioPlayer.setVolume(v);
+                  },
                 ),
               ),
             ],
@@ -863,8 +866,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       "assets/illusts/illust-sound.png",
                       onBoxTap: () {
                         setState(() {
-                           // Toggle slider visibility
-                           _isSoundSliderVisible = !_isSoundSliderVisible;
+                          // Toggle slider visibility
+                          _isSoundSliderVisible = !_isSoundSliderVisible;
                         });
 
                         if (_isSoundSliderVisible) {
@@ -872,7 +875,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                           _playSound(_soundName);
                         } else {
                           // If became hidden, stop sound
-                          _audioPlayer.stop(); 
+                          _audioPlayer.stop();
                         }
                       },
                       onTap: () async {
@@ -895,7 +898,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       },
                     ),
                     const SizedBox(height: 5),
-                    
+
                     // Wrap slider in AnimatedSize for show/hide effect
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),

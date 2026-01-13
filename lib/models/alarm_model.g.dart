@@ -26,7 +26,7 @@ class AlarmAdapter extends TypeAdapter<Alarm> {
       weekdays: (fields[6] as List).cast<int>(),
       missionType: fields[7] as MissionType,
       missionDifficulty: fields[8] as int,
-      missionCount: fields[13] as int,
+      missionCount: fields[13] == null ? 2 : fields[13] as int,
       soundFileName: fields[9] as String,
       duration: fields[10] as int,
       snoozeCount: fields[11] as int,

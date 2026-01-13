@@ -87,17 +87,67 @@ class NotificationService {
     // 하지만 ID는 int 범위 내여야 함.
     // 기존 id가 unique int라고 가정.
 
-    for (int weekday in weekdays) {
-      await _scheduleWeeklyNotification(
+    if (weekdays.isEmpty) {
+      // 요일 미선택 -> 일회성 알람 (오늘 or 내일)
+      await _scheduleOneTimeNotification(
         id: alarmId,
-        weekday: weekday,
         hour: hour,
         minute: minute,
         title: title,
         body: body,
         payload: payload,
       );
+    } else {
+      for (int weekday in weekdays) {
+        await _scheduleWeeklyNotification(
+          id: alarmId,
+          weekday: weekday,
+          hour: hour,
+          minute: minute,
+          title: title,
+          body: body,
+          payload: payload,
+        );
+      }
     }
+  }
+
+  Future<void> _scheduleOneTimeNotification({
+    required int id,
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+    required String payload,
+  }) async {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      _generateNotificationId(id, 0), // 0 for One-time
+      title,
+      body,
+      _nextInstanceOfTime(hour, minute),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'alarm_channel_id',
+          'Alarm Channel',
+          channelDescription: 'Channel for Alarm Notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+          fullScreenIntent: true,
+          audioAttributesUsage: AudioAttributesUsage.alarm,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          interruptionLevel: InterruptionLevel.timeSensitive,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      // No matchDateTimeComponents -> One time
+      payload: payload,
+    );
   }
 
   Future<void> _scheduleWeeklyNotification({
@@ -143,7 +193,8 @@ class NotificationService {
 
   // 알람 취소
   Future<void> cancelAlarm(int id) async {
-    for (int weekday = 1; weekday <= 7; weekday++) {
+    // 0(One-time) ~ 7(Sun)
+    for (int weekday = 0; weekday <= 7; weekday++) {
       await flutterLocalNotificationsPlugin.cancel(
         _generateNotificationId(id, weekday),
       );
@@ -186,6 +237,22 @@ class NotificationService {
     // 만약 계산된 시간이 현재보다 이전이면 7일 뒤로 (다음주)
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 7));
+    }
+    return scheduledDate;
+  }
+
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
     return scheduledDate;
   }
