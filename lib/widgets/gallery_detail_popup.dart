@@ -147,7 +147,7 @@ class GalleryDetailPopup extends StatelessWidget {
                             "${item.timestamp.year}년 ${item.timestamp.month}월 ${item.timestamp.day}일 (${_getWeekday(item.timestamp)})",
                             style: const TextStyle(
                               color: AppColors.baseWhite,
-                              fontSize: 14,
+                              fontSize: 18,
                               fontFamily: 'HYkanM',
                               height: 1.2,
                             ),
@@ -185,7 +185,7 @@ class GalleryDetailPopup extends StatelessWidget {
                             "주말은 쉬는 날!!", // Placeholder or item.label
                             style: const TextStyle(
                               color: AppColors.baseWhite,
-                              fontSize: 16,
+                              fontSize: 18,
                               fontFamily: 'HYkanM',
                             ),
                             maxLines: 1,
@@ -212,7 +212,8 @@ class GalleryDetailPopup extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 _getScoreFeedback(item.score),
-                                textAlign: TextAlign.left, // Left align looks better for 2 lines next to icon
+                                textAlign: TextAlign
+                                    .left, // Left align looks better for 2 lines next to icon
                                 style: const TextStyle(
                                   color: AppColors.baseYellow,
                                   fontSize: 20,
@@ -242,7 +243,7 @@ class GalleryDetailPopup extends StatelessWidget {
                       "내 갤러리에 저장하기",
                       style: TextStyle(
                         color: Color(0xFFD9D9D9),
-                        fontSize: 12,
+                        fontSize: 18,
                         decoration: TextDecoration.underline,
                         decorationColor: Color(0xFFD9D9D9),
                         fontFamily: 'HYkanM',

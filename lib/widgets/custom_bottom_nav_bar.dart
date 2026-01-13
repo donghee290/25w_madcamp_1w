@@ -26,11 +26,15 @@ class CustomBottomNavBar extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 105, 
+      // Removed fixed height: 105
       decoration: const BoxDecoration(
         gradient: AppColors.primaryGradient,
       ),
-      padding: const EdgeInsets.only(top: 10, bottom: 15),
+      // Add bottom padding from MediaQuery to account for system navigation bar
+      padding: EdgeInsets.only(
+        top: 10,
+        bottom: 15 + MediaQuery.of(context).viewPadding.bottom,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start, // Align top

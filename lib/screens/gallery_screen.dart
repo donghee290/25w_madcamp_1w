@@ -117,42 +117,60 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 15),
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        border: Border(bottom: BorderSide(color: Color(0xFF6E6E7E), width: 1)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 4,
-            offset: Offset(0, 4),
+    return Column(
+      children: [
+        // Part 1: Top Bar (Gradient + Title)
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.only(top: 20, bottom: 0),
+          decoration: const BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowColor,
+                blurRadius: 4,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'MY 기상 갤러리',
-            style: TextStyle(
-              color: AppColors.baseWhite,
-              fontSize: 22,
-              fontFamily: 'HYcysM',
+          child: Column(
+            children: [
+              const Text(
+                'MY 기상 갤러리',
+                style: TextStyle(
+                  color: AppColors.baseWhite,
+                  fontSize: 22,
+                  fontFamily: 'HYcysM',
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Divider(
+                color: Colors.black,
+                thickness: 2,
+                height: 2,
+              ),
+            ],
+          ),
+        ),
+        // Part 2: Bottom Area (Body Color + Sort Button)
+        Container(
+          width: double.infinity,
+          color: const Color(0xFF2E2E3E), // Match Body Color
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: BlackSubButton(
+                label: _isSortByScore ? '점수순' : '최신순',
+                width: 80,
+                height: 32,
+                onTap: _onSortPressed,
+              ),
             ),
           ),
-          const SizedBox(height: 15),
-          Align(
-            alignment: Alignment.centerRight,
-            child: BlackSubButton(
-              label: _isSortByScore ? '점수순' : '최신순',
-              width: 80,
-              height: 32,
-              onTap: _onSortPressed,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

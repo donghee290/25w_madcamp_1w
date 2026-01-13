@@ -20,7 +20,10 @@ class BlackMainButton extends StatelessWidget {
     this.isSelected = false,
     this.width = 80,
     this.height = 80,
-  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +77,7 @@ class BlackMainButton extends StatelessWidget {
                 label,
                 style: const TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 10,
+                  fontSize: 18,
                   fontFamily: 'HYkanM',
                   fontWeight: FontWeight.w400,
                 ),
@@ -139,7 +142,7 @@ class BlackSubButton extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.baseWhite,
-              fontSize: 12,
+              fontSize: 18,
               fontFamily: 'HYkanM',
               fontWeight: FontWeight.w400,
             ),
@@ -202,7 +205,7 @@ class RedSubButton extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.baseWhite,
-              fontSize: 12,
+              fontSize: 18,
               fontFamily: 'HYkanM',
               fontWeight: FontWeight.w400,
             ),
@@ -271,7 +274,7 @@ class YellowMainButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: AppColors.baseBlue,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanB',
                 fontWeight: FontWeight.w700,
               ),
@@ -327,7 +330,7 @@ class GrayButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: Colors.black,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanM',
                 fontWeight: FontWeight.w400,
               ),
@@ -383,7 +386,7 @@ class YellowGrayButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: AppColors.baseBlue,
-                fontSize: 16,
+                fontSize: 18,
                 fontFamily: 'HYkanB',
                 fontWeight: FontWeight.w700,
               ),

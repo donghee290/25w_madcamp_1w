@@ -11,6 +11,8 @@ import '../widgets/design_system_buttons.dart';
 import '../widgets/custom_switch.dart';
 import '../widgets/sound_selection_popup.dart';
 import '../widgets/mission_selection_popup.dart';
+import '../constants/sound_constants.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class CreateAlarmScreen extends StatefulWidget {
   final Alarm? alarm;
@@ -34,6 +36,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   //Sound & Mission
   double _volume = 0.5;
   String _soundName = "일어나셔야 합니다";
+  bool _isSoundSliderVisible = false; // Initial state: hidden
 
   String _missionName = "미션을 선택해주세요.";
   MissionType _missionType = MissionType.math;
@@ -135,11 +138,43 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     }
   }
 
+  // Audio Player
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   void dispose() {
     _labelController.dispose();
+    // Safe disposal
+    _audioPlayer.stop().catchError((e) {
+      debugPrint("Error stopping audio on dispose: $e");
+    });
+    _audioPlayer.dispose();
     super.dispose();
   }
+
+  Future<void> _playSound(String soundName) async {
+    try {
+      await _audioPlayer.stop();
+
+      if (soundName.contains('/') ||
+          soundName.contains(Platform.pathSeparator)) {
+        // Custom recording path
+        if (File(soundName).existsSync()) {
+          await _audioPlayer.play(DeviceFileSource(soundName));
+        }
+      } else {
+        // Ensure mapping exists or fallback
+        String assetPath = SoundConstants.soundFileMap[soundName] ?? '1.mp3';
+        
+        // AssetSource automatically looks in 'assets/'. 
+        // Our map values are just filenames like '1.mp3', so we prepend 'sounds/'.
+        await _audioPlayer.play(AssetSource("sounds/$assetPath"));
+      }
+    } catch (e) {
+      debugPrint("Error playing sound: $e");
+    }
+  }
+
 
   void _saveAlarm() {
     final provider = Provider.of<AlarmProvider>(context, listen: false);
@@ -186,13 +221,13 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     return Container(
       width: double.infinity,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 18), // 20 -> 18
       color: Colors.transparent,
       child: const Text(
         "기상 생성하기",
         style: TextStyle(
           fontFamily: 'HYcysM',
-          fontSize: 22,
+          fontSize: 24, // 22 -> 24
           color: AppColors.baseWhite,
         ),
       ),
@@ -205,16 +240,16 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     const textStyle = TextStyle(
       fontFamily: 'HYcysM',
       color: AppColors.baseWhite,
-      fontSize: 32,
+      fontSize: 36, // 32 -> 36
     );
     const amPmStyle = TextStyle(
       fontFamily: 'HYcysM',
       color: AppColors.baseWhite,
-      fontSize: 24,
+      fontSize: 26, // 24 -> 26
     );
 
     return Container(
-      height: 150,
+      height: 140, // 150 -> 140
       margin: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -327,13 +362,15 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 style: TextStyle(
                   color: Color(0xFFD9D9D9),
                   fontFamily: 'HYkanM',
-                  fontSize: 14,
+                  fontSize:
+                      14, // 12/14 ->? Wait, "한번만" was 14. Let's make it 16?
+                  // Original: 14. Plan: Increase by 2. -> 16.
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 12), // 15 -> 12
         // Weekdays
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -368,10 +405,18 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                   height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.baseYellow
-                        : const Color(0xFF3E3E4E), // Dark Gray
+                    color: null, // Always use gradient
+                    gradient: isSelected
+                        ? AppColors.secondaryGradient
+                        : AppColors.primaryGradient,
                     borderRadius: BorderRadius.circular(5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 4,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                     border: isSelected
                         ? null
                         : Border.all(color: const Color(0xFF6E6E7E)),
@@ -383,7 +428,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                           ? AppColors.baseBlue
                           : const Color(0xFFD9D9D9),
                       fontFamily: 'HYkanB',
-                      fontSize: 14,
+                      fontSize: 16, // 14 -> 16
                     ),
                   ),
                 ),
@@ -400,6 +445,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     String content,
     String iconPath, {
     VoidCallback? onTap,
+    VoidCallback? onBoxTap, // NEW: Handler for box tap
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +457,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               title,
               style: const TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 14,
+                fontSize: 16, // 14 -> 16
                 fontFamily: 'HYkanM',
               ),
             ),
@@ -421,43 +467,49 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                 "설정하러 가기",
                 style: TextStyle(
                   color: AppColors.baseWhite,
-                  fontSize: 10,
+                  fontSize: 12, // 10 -> 12
                   decoration: TextDecoration.underline,
+                  decorationColor: AppColors.baseWhite, // NEW
                   fontFamily: 'HYkanM',
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          height: 60,
-          decoration: BoxDecoration(
-            gradient: AppColors.gradSkyblue,
-            borderRadius: BorderRadius.circular(0), // Sharp rect
-            border: Border.all(color: const Color(0xFF396DA9), width: 2),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 15),
-              Image.asset(iconPath, width: 32, height: 32),
-              const SizedBox(width: 15),
-              // FIX: Wrapped in Expanded and added overflow handling
-              Expanded(
-                child: Text(
-                  content,
-                  style: const TextStyle(
-                    color: Color(0xFF5882B4),
-                    fontSize: 16,
-                    fontFamily: 'HYkanB',
+        const SizedBox(height: 6), // 8 -> 6
+        GestureDetector(
+          // NEW: Rap in GestureDetector
+          onTap: onBoxTap,
+          child: Container(
+            width: double.infinity,
+            height: 60, // Keep height mostly? Text is bigger.
+            // Plan said 56? But bigger text might need 60. Let's keep 60.
+            decoration: BoxDecoration(
+              gradient: AppColors.gradSkyblue,
+              borderRadius: BorderRadius.circular(0), // Sharp rect
+              border: Border.all(color: const Color(0xFF396DA9), width: 2),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 15),
+                Image.asset(iconPath, width: 32, height: 32),
+                const SizedBox(width: 15),
+                // FIX: Wrapped in Expanded and added overflow handling
+                Expanded(
+                  child: Text(
+                    content,
+                    style: const TextStyle(
+                      color: Color(0xFF5882B4),
+                      fontSize: 18, // 16 -> 18
+                      fontFamily: 'HYkanB',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 15),
-            ],
+                const SizedBox(width: 15),
+              ],
+            ),
           ),
         ),
       ],
@@ -465,33 +517,57 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   }
 
   Widget _buildSlider() {
-    return Stack(
-      alignment: Alignment.center,
+    return Row(
       children: [
-        Container(
-          height: 30,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
-            ),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: const Color(0xFF6E6E7E)),
+        const Text(
+          "0",
+          style: TextStyle(
+            color: Color(0xFFC8C8C8),
+            fontSize: 12,
+            fontFamily: 'HYkanM',
           ),
         ),
-        SliderTheme(
-          data: SliderThemeData(
-            trackHeight: 2,
-            activeTrackColor: Colors.transparent,
-            inactiveTrackColor: Colors.transparent,
-            thumbShape: _CustomThumbShape(image: _sliderThumbImage),
-            overlayShape: SliderComponentShape.noOverlay,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 15, // 30 -> 15 (Half)
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF4E4E5E), Color(0xFF0E0E1E)],
+                  ),
+                  borderRadius: BorderRadius.circular(7.5), // 15 -> 7.5
+                  border: Border.all(color: const Color(0xFF6E6E7E)),
+                ),
+              ),
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 2,
+                  activeTrackColor: Colors.transparent,
+                  inactiveTrackColor: Colors.transparent,
+                  thumbShape: _CustomThumbShape(image: _sliderThumbImage),
+                  overlayShape: SliderComponentShape.noOverlay,
+                ),
+                child: Slider(
+                  value: _volume,
+                  onChanged: (v) => setState(() => _volume = v),
+                ),
+              ),
+            ],
           ),
-          child: Slider(
-            value: _volume,
-            onChanged: (v) => setState(() => _volume = v),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          "100",
+          style: TextStyle(
+            color: Color(0xFFC8C8C8),
+            fontSize: 12,
+            fontFamily: 'HYkanM',
           ),
         ),
       ],
@@ -506,12 +582,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           "커스텀 설정",
           style: TextStyle(
             color: AppColors.baseWhite,
-            fontSize: 14,
+            fontSize: 16, // 14 -> 16
             fontFamily: 'HYkanM',
           ),
         ),
-        const SizedBox(height: 15),
-
+        const SizedBox(height: 12), // 15 -> 12
         // Vibration
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -520,7 +595,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "진동 울리기",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 12,
+                fontSize: 14, // 12 -> 14
                 fontFamily: 'HYkanM',
               ),
             ),
@@ -530,8 +605,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 15),
-
+        const SizedBox(height: 12), // 15 -> 12
         // Duration
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -540,7 +614,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "알람 지속시간",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 12,
+                fontSize: 14, // 12 -> 14
                 fontFamily: 'HYkanM',
               ),
             ),
@@ -548,13 +622,13 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "$_duration분",
               style: const TextStyle(
                 color: AppColors.baseYellow,
-                fontSize: 12,
+                fontSize: 14, // 12 -> 14
                 fontFamily: 'HYkanB',
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6), // 8 -> 6
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [1, 3, 5]
@@ -567,8 +641,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               )
               .toList(),
         ),
-        const SizedBox(height: 15),
-
+        const SizedBox(height: 12), // 15 -> 12
         // Snooze
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -577,7 +650,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
               "알람 미루기",
               style: TextStyle(
                 color: AppColors.baseWhite,
-                fontSize: 12,
+                fontSize: 14, // 12 -> 14
                 fontFamily: 'HYkanM',
               ),
             ),
@@ -587,7 +660,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6), // 8 -> 6
         Opacity(
           opacity: _isSnoozeOn ? 1.0 : 0.3,
           child: Row(
@@ -616,22 +689,28 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
           height: 35,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color(0xFF3E3E4E),
+            color: null,
+            gradient: isSelected
+                ? AppColors.secondaryGradient
+                : AppColors.primaryGradient,
             borderRadius: BorderRadius.circular(5),
-            boxShadow: isSelected
-                ? [
-                    // Optional specific shadow style if needed
-                  ]
-                : [],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Text(
             text,
             style: TextStyle(
               color: isSelected
-                  ? AppColors.baseYellow
+                  ? AppColors
+                        .baseBlue // Yellow gradient needs dark text
                   : const Color(0xFFD9D9D9),
               fontFamily: isSelected ? 'HYkanB' : 'HYkanM',
-              fontSize: 12,
+              fontSize: 14, // 12 -> 14
             ),
           ),
         ),
@@ -662,6 +741,12 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
+                const Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Divider(color: Colors.black, thickness: 2, height: 2),
+                ),
               ],
             ),
 
@@ -676,11 +761,11 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       "기상 이름",
                       style: TextStyle(
                         color: AppColors.baseWhite,
-                        fontSize: 12,
+                        fontSize: 14, // 12 -> 14
                         fontFamily: 'HYkanM',
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6), // 8 -> 6
                     Container(
                       height: 40,
                       decoration: BoxDecoration(
@@ -716,7 +801,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       "기상 시간",
                       style: TextStyle(
                         color: AppColors.baseWhite,
-                        fontSize: 12,
+                        fontSize: 14, // 12 -> 14
                         fontFamily: 'HYkanM',
                       ),
                     ),
@@ -732,9 +817,23 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       // FIX: Display conditional logic for sound name
                       (_soundName.contains('/') ||
                               _soundName.contains(Platform.pathSeparator))
-                          ? "직접 녹음하기"
+                          ? SoundConstants.customRecordingKey
                           : _soundName,
                       "assets/illusts/illust-sound.png",
+                      onBoxTap: () {
+                        setState(() {
+                           // Toggle slider visibility
+                           _isSoundSliderVisible = !_isSoundSliderVisible;
+                        });
+
+                        if (_isSoundSliderVisible) {
+                          // If became visible, play sound
+                          _playSound(_soundName);
+                        } else {
+                          // If became hidden, stop sound
+                          _audioPlayer.stop(); 
+                        }
+                      },
                       onTap: () async {
                         final result = await showModalBottomSheet(
                           context: context,
@@ -755,13 +854,28 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                       },
                     ),
                     const SizedBox(height: 5),
-                    _buildSlider(),
-
-                    const SizedBox(height: 15),
+                    
+                    // Wrap slider in AnimatedSize for show/hide effect
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: _isSoundSliderVisible
+                          ? Column(
+                              children: [
+                                _buildSlider(),
+                                const SizedBox(height: 15),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                     _buildBlueBox(
                       "기상 미션",
                       _missionName,
                       _missionIconOf(_missionType),
+                      onBoxTap: () {
+                        // Optional: Show mission toast or something else?
+                        // For now do nothing as requested is only for sound
+                      },
                       onTap: () async {
                         final result = await showModalBottomSheet(
                           context: context,

@@ -140,7 +140,7 @@ class _MissionSelectionPopupState extends State<MissionSelectionPopup> {
                                   opt.title,
                                   style: const TextStyle(
                                     fontFamily: 'HYkanB',
-                                    fontSize: 16,
+                                    fontSize: 18,
                                     color: Color(0xFF5882B4),
                                   ),
                                 ),
