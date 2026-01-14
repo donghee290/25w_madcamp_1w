@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../models/alarm_model.dart';
 import '../../providers/alarm_provider.dart';
 import '../main_screen.dart';
+import '../../constants/image_constants.dart';
 
 class AlarmResultScreen extends StatefulWidget {
   final int scheduledHour;
@@ -123,16 +124,34 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
   }
 
   void _selectRandomImage() {
-    final images = [
-      'illust-pepe.png',
-      'illust-math.png',
-      'illust-write.png',
-      'illust-shake.png',
-      'illust-colors.png',
-      'illust-alarm.png',
-    ];
+    List<String> images;
+    switch (score) {
+      case 5:
+        images = ImageConstants.imagelevel5List;
+        break;
+      case 4:
+        images = ImageConstants.imagelevel4List;
+        break;
+      case 3:
+        images = ImageConstants.imagelevel3List;
+        break;
+      case 2:
+        images = ImageConstants.imagelevel2List;
+        break;
+      case 1:
+      default:
+        images = ImageConstants.imagelevel1List;
+        break;
+    }
+    
+    // Fallback if list is somehow empty (though constants shouldn't be)
+    if (images.isEmpty) {
+      _randomImagePath = "assets/illusts/illust-pepe.png";
+      return;
+    }
+
     final random = Random();
-    _randomImagePath = "assets/illusts/${images[random.nextInt(images.length)]}";
+    _randomImagePath = "assets/images/${images[random.nextInt(images.length)]}";
   }
   
   String _getScoreMessage(int score) {

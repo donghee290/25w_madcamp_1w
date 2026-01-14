@@ -46,6 +46,7 @@ flutter:
 
   assets:
     - assets/illusts/
+    - assets/images/
     - assets/sounds/
     - assets/logo.png
 

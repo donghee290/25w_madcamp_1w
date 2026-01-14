@@ -782,52 +782,37 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   }
 
   String _getSoundDisplayName(String soundName) {
-    String prefix = "";
-    String cleanName = soundName;
-
-    // Handle Prefixes
-    if (soundName.startsWith("녹음한 음원 : ")) {
-      prefix = "녹음한 음원 : ";
-      cleanName = soundName.replaceFirst("녹음한 음원 : ", "");
-    } else if (soundName.startsWith("나의 음원 : ")) {
-      prefix = "나의 음원 : ";
-      cleanName = soundName.replaceFirst("나의 음원 : ", "");
-    }
-
-    // 1. Check if trimmed name is a known Key (Preset Name)
-    // Note: If prefix exists, cleanName is a path, won't be a key unless key is path-like?
-    // Unlikely, but safe to check.
-    if (SoundConstants.soundFileMap.containsKey(cleanName)) {
-      return prefix + cleanName;
+    // 1. Check if it's a known Key (Preset Name)
+    if (SoundConstants.soundFileMap.containsKey(soundName)) {
+      return soundName;
     }
 
     // 2. Check if it's a known Value (Filename) -> Logically reverse map
-    // (This handles legacy/mixed state where filename was saved)
     for (var entry in SoundConstants.soundFileMap.entries) {
-      if (entry.value == cleanName) {
-        return prefix + entry.key;
+      if (entry.value == soundName) {
+        return entry.key;
       }
     }
 
     // 3. Check for specific keys
-    if (cleanName == SoundConstants.customRecordingKey ||
-        cleanName == SoundConstants.myAudioKey) {
-      return prefix + cleanName;
+    if (soundName == SoundConstants.customRecordingKey ||
+        soundName == SoundConstants.myAudioKey) {
+      return soundName;
     }
 
     // 4. Check if it's a file path
-    if (cleanName.contains('/') || cleanName.contains(Platform.pathSeparator)) {
+    if (soundName.contains('/') || soundName.contains(Platform.pathSeparator)) {
       try {
-        String fileName = cleanName.split(Platform.pathSeparator).last;
+        String fileName = soundName.split(Platform.pathSeparator).last;
         // Regex to clean timestamp: name_timestamp.ext
         final RegExp regex = RegExp(r'^(.*)_(\d+)\.(\w+)');
         final match = regex.firstMatch(fileName);
         if (match != null) {
           return "${match.group(1)}.${match.group(3)}";
         }
-        return prefix + fileName;
+        return fileName;
       } catch (e) {
-        return "${prefix}알 수 없는 파일";
+        return "알 수 없는 파일";
       }
     }
 
