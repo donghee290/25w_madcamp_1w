@@ -23,10 +23,10 @@ class SoundSelectionList extends StatefulWidget {
   });
 
   @override
-  State<SoundSelectionList> createState() => _SoundSelectionListState();
+  State<SoundSelectionList> createState() => SoundSelectionListState();
 }
 
-class _SoundSelectionListState extends State<SoundSelectionList> {
+class SoundSelectionListState extends State<SoundSelectionList> {
   late String _selectedSound;
   late double _volume;
   String? _customRecordingPath;
@@ -67,6 +67,15 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     }
 
     _sliderOpened = false;
+  }
+  
+  Future<void> stopAudio() async {
+    await _audioPlayer.stop();
+    if (mounted) {
+      setState(() {
+        _sliderOpened = false;
+      });
+    }
   }
 
   @override

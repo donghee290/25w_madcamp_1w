@@ -217,7 +217,9 @@ class GalleryDetailPopup extends StatelessWidget {
                           const SizedBox(height: 5),
                           // Title
                           Text(
-                            item.score >= 4 ? "최고의 컨디션!" : "조금 더 힘내봐요", // Dynamic Placeholder
+                            item.score >= 4
+                                ? "최고의 컨디션!"
+                                : "조금 더 힘내봐요", // Dynamic Placeholder
                             style: const TextStyle(
                               color: AppColors.baseWhite,
                               fontSize: 18,
