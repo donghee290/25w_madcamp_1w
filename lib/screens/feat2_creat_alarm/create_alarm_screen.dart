@@ -985,6 +985,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                           ),
                         );
 
+                        if (!mounted) return;
+
                         if (result != null && result is Map) {
                           setState(() {
                             _missionType = result['missionType'] as MissionType;

@@ -59,7 +59,6 @@ class ImageConstants {
     "5키자루페페.png",
     "5한잔해페페.png",
     "5흡족.png",
-    "5기분좋은날.png",
     "5기분좋은박명수.png",
     "5남자다운기상.png",
     "5오늘은너의날.png",
