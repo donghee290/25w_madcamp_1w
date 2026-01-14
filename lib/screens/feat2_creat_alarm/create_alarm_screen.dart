@@ -827,7 +827,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         }
         return prefix + fileName;
       } catch (e) {
-        return "${prefix}알 수 없는 파일";
+        return "$prefix알 수 없는 파일";
       }
     }
 
