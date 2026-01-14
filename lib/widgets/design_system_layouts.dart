@@ -3,7 +3,7 @@ import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
 import '../theme/app_colors.dart';
 
 class PopupSmall extends StatelessWidget {
-  final Widget child; 
+  final Widget child;
   final double? width;
   final double? height;
 
@@ -14,13 +14,13 @@ class PopupSmall extends StatelessWidget {
     // Background: primaryGradient
     // Border: White 3px
     // Radius: 30px
-    // Shadows: 
+    // Shadows:
     //   1. Drop: Off(0,4), Blur 4, Spread 0 (Outer)
     //   2. Inner: Off(0,4), Blur 8, Spread 4 (Inner)
     return Container(
       width: width,
       height: height,
-      padding: const EdgeInsets.all(20), 
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(30),
@@ -44,7 +44,7 @@ class PopupSmall extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(child: child),
+      child: child,
     );
   }
 }
@@ -75,24 +75,24 @@ class PopupBig extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         // BoxDecoration border applies to all sides if using Border.all.
-        // If we want top rounded and border on all sides? 
+        // If we want top rounded and border on all sides?
         // RoundedRectangleBorder handled this elegantly.
         // BoxDecoration with border supports it too.
         borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
         border: Border.all(width: 3, color: AppColors.baseWhite),
         boxShadow: const [
-           // Drop
-           BoxShadow(
+          // Drop
+          BoxShadow(
             color: AppColors.shadowColor,
             blurRadius: 4,
             offset: Offset(0, 4),
             inset: false,
           ),
           // Inner
-           BoxShadow(
+          BoxShadow(
             color: AppColors.shadowColor,
             blurRadius: 8,
             offset: Offset(0, 4),

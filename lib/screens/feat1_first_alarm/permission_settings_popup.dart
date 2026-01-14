@@ -48,7 +48,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                     text: '서비스 이용을 위해 필요한 권한을\n모두 허용해주세요.',
                     highlight: '권한',
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 15),
                   const Text(
                     '※ 권한을 허용하지 않으면 서비스를 이용할 수 없어요.',
                     textAlign: TextAlign.center,
@@ -59,12 +59,12 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 40,
+                          height: 45,
                           child: Material(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(6),
@@ -95,7 +95,7 @@ class _PermissionSettingsPopupView extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: SizedBox(
-                          height: 40,
+                          height: 45,
                           child: Material(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(6),
