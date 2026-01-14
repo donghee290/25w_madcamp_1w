@@ -44,13 +44,26 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     _volume = widget.initialVolume;
     _loadSliderThumbImage();
 
-    if (_soundOptions.contains(widget.initialSound)) {
-      _selectedSound = widget.initialSound;
-    } else if (widget.initialSound.isNotEmpty) {
+    String initSound = widget.initialSound;
+
+    // Parse formatted strings
+    if (initSound.startsWith("녹음한 음원 : ")) {
+      _selectedSound = SoundConstants.customRecordingKey;
+      _customRecordingPath = initSound.replaceFirst("녹음한 음원 : ", "");
+    } else if (initSound.startsWith("나의 음원 : ")) {
       _selectedSound = SoundConstants.myAudioKey;
-      _customAudioPath = widget.initialSound;
+      _customAudioPath = initSound.replaceFirst("나의 음원 : ", "");
+    } else if (_soundOptions.contains(initSound)) {
+      _selectedSound = initSound;
     } else {
-      _selectedSound = "";
+      // Legacy handling or empty
+      if (initSound.isNotEmpty && File(initSound).existsSync()) {
+        // Assume My Audio if it's a file path but not formatted
+        _selectedSound = SoundConstants.myAudioKey;
+        _customAudioPath = initSound;
+      } else {
+        _selectedSound = "";
+      }
     }
 
     _sliderOpened = false;
@@ -111,14 +124,15 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
   }
 
   void _notifyChange() {
-    // Resolve effective sound string
+    // Resolve effective sound string with Prefix
     String resultSound = _selectedSound;
+    
     if (_selectedSound == SoundConstants.customRecordingKey &&
         _customRecordingPath != null) {
-      resultSound = _customRecordingPath!;
+      resultSound = "녹음한 음원 : $_customRecordingPath";
     } else if (_selectedSound == SoundConstants.myAudioKey &&
         _customAudioPath != null) {
-      resultSound = _customAudioPath!;
+      resultSound = "나의 음원 : $_customAudioPath";
     }
 
     widget.onSelectionChanged(resultSound, _volume);

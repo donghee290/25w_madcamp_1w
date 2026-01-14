@@ -218,33 +218,14 @@ class _MissionDifficultySelectionPopupState
         children: options.map((o) {
           final selected = o.value == selectedValue;
           return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => onPick(o.value)),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: BlackSubButton(
+                label: o.label,
+                onTap: () => setState(() => onPick(o.value)),
+                isSelected: selected,
+                width: double.infinity,
                 height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3E3E4E),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: selected
-                        ? AppColors.baseYellow
-                        : const Color(0xFF6E6E7E),
-                    width: selected ? 2 : 1,
-                  ),
-                ),
-                child: Text(
-                  o.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: selected ? 'HYkanB' : 'HYkanM',
-                    fontSize: 12,
-                    color: selected
-                        ? AppColors.baseYellow
-                        : const Color(0xFFD9D9D9),
-                  ),
-                ),
               ),
             ),
           );
