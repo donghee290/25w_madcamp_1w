@@ -26,22 +26,17 @@ class GalleryDetailPopup extends StatelessWidget {
       case 2:
         return "분발\n하세욧!";
       case 1:
-        return "최악\n.."; // Adjusted for 2-char logic if possible
+        return "최악\n..";
       default:
         return "기상\n완료!";
     }
   }
 
-  // Temporary mapping for mission assets based on image paths or scores if random
-  // Logic: For now, I'll use a placeholder mission asset or guess from generic logic
   String _getMissionAsset() {
-    // In real app, GalleryItem should store missionType.
-    // Placeholder: Return specific icon based on score or random
     return "assets/illusts/illust-math.png"; // Placeholder
   }
 
   Future<void> _saveToGallery(BuildContext context) async {
-    // Capture
     try {
       RenderRepaintBoundary? boundary =
           _globalKey.currentContext?.findRenderObject()
@@ -54,7 +49,6 @@ class GalleryDetailPopup extends StatelessWidget {
       );
 
       if (byteData != null) {
-        // Use Gal to save
         await Gal.putImageBytes(
           byteData.buffer.asUint8List(),
           name:
@@ -62,7 +56,6 @@ class GalleryDetailPopup extends StatelessWidget {
         );
 
         if (!context.mounted) return;
-
         _showSuccessPopup(context);
       }
     } catch (e) {
@@ -124,13 +117,12 @@ class GalleryDetailPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We wrap the PopupBig in RepaintBoundary to capture it
     return Center(
       child: RepaintBoundary(
         key: _globalKey,
         child: PopupBig(
-          width: 350, // Slightly wider for the layout
-          height: 550, // Increased to prevent bottom overflow
+          width: 350,
+          height: 550,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -150,7 +142,6 @@ class GalleryDetailPopup extends StatelessWidget {
                 ),
               ),
 
-              // Image
               // Image section
               Container(
                 width: 280,
@@ -165,81 +156,78 @@ class GalleryDetailPopup extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Info Section (Row)
+              // Info Section (UPDATED DESIGN)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left Column: Date, Time, Title
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Date
-                          Text(
-                            "${item.timestamp.year}년 ${item.timestamp.month}월 ${item.timestamp.day}일 (${_getWeekday(item.timestamp)})",
-                            style: const TextStyle(
-                              color: AppColors.baseWhite,
-                              fontSize: 18,
-                              fontFamily: 'HYkanM',
-                              height: 1.2,
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Left Column: Date, Time, Title
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${item.timestamp.year}년 ${item.timestamp.month}월 ${item.timestamp.day}일 (${_getWeekday(item.timestamp)})",
+                              style: const TextStyle(
+                                color: AppColors.baseWhite,
+                                fontSize: 18,
+                                fontFamily: 'HYkanM',
+                                height: 1.2,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Time
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: DateFormat(
-                                    'hh:mm',
-                                  ).format(item.timestamp),
-                                  style: const TextStyle(
-                                    color: AppColors.baseWhite,
-                                    fontSize: 36,
-                                    fontFamily: 'HYcysM', // Serif font
-                                    letterSpacing: 2,
+                            const SizedBox(height: 5),
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: DateFormat(
+                                      'hh:mm',
+                                    ).format(item.timestamp),
+                                    style: const TextStyle(
+                                      color: AppColors.baseWhite,
+                                      fontSize: 36,
+                                      fontFamily: 'HYcysM',
+                                      letterSpacing: 2,
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: DateFormat('a').format(item.timestamp),
-                                  style: const TextStyle(
-                                    color: AppColors.baseWhite,
-                                    fontSize: 18,
-                                    fontFamily: 'HYcysM',
+                                  TextSpan(
+                                    text: DateFormat(
+                                      'a',
+                                    ).format(item.timestamp),
+                                    style: const TextStyle(
+                                      color: AppColors.baseWhite,
+                                      fontSize: 18,
+                                      fontFamily: 'HYcysM',
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Title
-                          Text(
-                            item.score >= 4
-                                ? "최고의 컨디션!"
-                                : "조금 더 힘내봐요", // Dynamic Placeholder
-                            style: const TextStyle(
-                              color: AppColors.baseWhite,
-                              fontSize: 18,
-                              fontFamily: 'HYkanM',
+                            const SizedBox(height: 5),
+                            Text(
+                              item.score >= 4 ? "최고의 컨디션!" : "조금 더 힘내봐요",
+                              style: const TextStyle(
+                                color: AppColors.baseWhite,
+                                fontSize: 18,
+                                fontFamily: 'HYkanM',
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
 
-                    // Right Column: Mission Icon + Score Text
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                      // Right Column: Mission Icon + Score Text (UPDATED DESIGN)
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Image.asset(
                                 _getMissionAsset(),
@@ -249,8 +237,7 @@ class GalleryDetailPopup extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 _getScoreFeedback(item.score),
-                                textAlign: TextAlign
-                                    .left, // Left align looks better for 2 lines next to icon
+                                textAlign: TextAlign.left,
                                 style: const TextStyle(
                                   color: AppColors.baseYellow,
                                   fontSize: 20,
@@ -260,16 +247,16 @@ class GalleryDetailPopup extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
               const Spacer(),
 
-              // Save Button (Bottom Right)
+              // Save Button (fontSize UPDATED to 16)
               Align(
                 alignment: Alignment.centerRight,
                 child: Padding(
@@ -280,7 +267,7 @@ class GalleryDetailPopup extends StatelessWidget {
                       "내 갤러리에 저장하기",
                       style: TextStyle(
                         color: Color(0xFFD9D9D9),
-                        fontSize: 18,
+                        fontSize: 16,
                         decoration: TextDecoration.underline,
                         decorationColor: Color(0xFFD9D9D9),
                         fontFamily: 'HYkanM',

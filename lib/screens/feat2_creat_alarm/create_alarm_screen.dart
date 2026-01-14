@@ -931,6 +931,8 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                           ),
                         );
 
+                        if (!mounted) return;
+
                         if (result != null && result is Map) {
                           setState(() {
                             _soundName = result['soundName'];
