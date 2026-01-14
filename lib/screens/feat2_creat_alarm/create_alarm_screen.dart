@@ -34,7 +34,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
   //Sound & Mission
   double _volume = 0.5;
-  String _soundName = "Good Morning(LG)";
+  String _soundName = "카이스트 거위";
   bool _isSoundSliderVisible = false;
   String _missionName = "수학 문제";
   MissionType _missionType = MissionType.math;
