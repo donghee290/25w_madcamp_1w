@@ -44,7 +44,7 @@ class PopupSmall extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(child: child),
+      child: child,
     );
   }
 }

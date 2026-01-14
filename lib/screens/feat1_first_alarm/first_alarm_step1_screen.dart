@@ -164,7 +164,7 @@ class _FirstAlarmStep1ScreenState extends State<FirstAlarmStep1Screen> {
                 fontWeight: FontWeight.w400,
               ),
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 110),
 
             // Time Picker
             _buildTimePicker(),

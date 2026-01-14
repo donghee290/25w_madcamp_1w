@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/alarm_provider.dart';
 import '../../providers/next_alarm_provider.dart';
-import '../../models/alarm_model.dart'; 
+import '../../models/alarm_model.dart';
 import '../feat2_creat_alarm/create_alarm_screen.dart';
 import '../../widgets/alarm_card.dart';
 import '../../widgets/design_system_buttons.dart';
@@ -128,7 +128,10 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
         // Part 1: Top Bar (Gradient + Title)
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(top: 0, bottom: 0), // Remove internal padding
+          padding: const EdgeInsets.only(
+            top: 0,
+            bottom: 0,
+          ), // Remove internal padding
           decoration: const BoxDecoration(
             gradient: AppColors.primaryGradient,
             boxShadow: [
@@ -176,7 +179,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                         style: const TextStyle(
                           color: AppColors.baseWhite,
                           fontSize: 20,
-                          fontFamily: 'HYcysM',
+                          fontFamily: 'HYkanB',
                         ),
                       );
                     },
@@ -194,7 +197,10 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                     // DELETE Button (Toggle Label/Style)
                     if (_isDeleteMode)
                       _selectedAlarmIds.isEmpty
-                          ? BlackSubButton(label: '취소', onTap: _toggleDeleteMode)
+                          ? BlackSubButton(
+                              label: '취소',
+                              onTap: _toggleDeleteMode,
+                            )
                           : RedSubButton(label: '삭제', onTap: _toggleDeleteMode)
                     else
                       BlackSubButton(label: '선택', onTap: _toggleDeleteMode),

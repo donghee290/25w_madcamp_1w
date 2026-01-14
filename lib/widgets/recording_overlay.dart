@@ -130,9 +130,9 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
         _recordedPath = path;
         _step = RecordingStateStep.review;
       });
-      // Setup audio player source
       await _audioPlayer.setSourceDeviceFile(_recordedPath!);
       await _audioPlayer.setVolume(_volume);
+      await _audioPlayer.play(DeviceFileSource(_recordedPath!));
     }
   }
 
@@ -220,39 +220,41 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
         // Center Countdown Number
         Image.asset(
           'assets/illusts/illust-count$_countdown.png',
-          width: 100, // Adjust size as needed
+          width: 80,
           fit: BoxFit.contain,
         ),
 
         // Bottom Popup
         Positioned(
-          bottom: 40,
+          bottom: 50,
           left: 20,
           right: 20,
           child: PopupSmall(
-            height: 240, // Increased from 200
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "곧 녹음을 시작합니다.",
-                  style: TextStyle(
-                    fontFamily: 'HYkanM',
-                    fontSize: 16,
-                    color: AppColors.baseWhite,
+            height: 150,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "곧 녹음을 시작합니다.",
+                    style: TextStyle(
+                      fontFamily: 'HYkanM',
+                      fontSize: 16,
+                      color: AppColors.baseWhite,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                GrayButton(
-                  label: "돌아가기",
-                  width: 120,
-                  height: 48,
-                  onTap: () {
-                    _timer?.cancel();
-                    widget.onClose();
-                  },
-                ),
-              ],
+                  const SizedBox(height: 12), // 20 -> 12
+                  GrayButton(
+                    label: "돌아가기",
+                    width: 120,
+                    height: 45,
+                    onTap: () {
+                      _timer?.cancel();
+                      widget.onClose();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -274,12 +276,6 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
           ),
         ),
 
-        // Top Right Close Button (Custom placement)
-        // User requested: "illust-record.png 오른쪽 위에 x표시 넣음" -> Usually relative to the image?
-        // Or screen top right? "오른쪽 위에 x표를 누르면" -> Usually screen.
-        // But prompt says "illust-record.png 오른쪽 위에".
-        // Let's put it on top right of the screen for better UX, or closely relative to the image.
-        // I will put it relative to the center image to match description literally.
         Positioned(
           left: MediaQuery.of(context).size.width / 2 + 50, // approx
           top: MediaQuery.of(context).size.height / 2 - 100,
@@ -293,92 +289,98 @@ class _RecordingOverlayState extends State<RecordingOverlay> {
   }
 
   Widget _buildReviewUI() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: PopupSmall(
-          height: 360, // Increased from 320
-          child: Column(
-            children: [
-              // Header Close Button
-              Align(
-                alignment: Alignment.topRight,
-                child: GestureDetector(
-                  onTap: _cancelRecording,
-                  child: const Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Icon(
-                      Icons.close,
-                      color: AppColors.baseWhite,
-                      size: 20,
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: PopupSmall(
+            height: 240,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // 닫기 버튼 (높이 최소)
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: _cancelRecording,
+                      child: const Icon(
+                        Icons.close,
+                        color: AppColors.baseWhite,
+                        size: 20,
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // Title
-              const Text(
-                "녹음이 완료되었습니다.\n기상 사운드로 등록할까요?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'HYkanM',
-                  fontSize: 16,
-                  color: AppColors.baseWhite,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 15),
+                  const SizedBox(height: 6),
 
-              // Controls
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    // Play Toggle
-                    GestureDetector(
-                      onTap: _togglePlay,
-                      child: Icon(
-                        _isPlaying
-                            ? Icons.pause_circle_filled
-                            : Icons.play_circle_filled,
-                        color: AppColors.baseYellow,
-                        size: 36,
+                  const SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                        "녹음이 완료되었습니다.\n기상 사운드로 등록할까요?",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'HYkanM',
+                          fontSize: 16,
+                          color: AppColors.baseWhite,
+                          height: 1.35,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 15),
-                    // Volume Slider
-                    Expanded(child: _buildSlider()),
-                  ],
-                ),
-              ),
+                  ),
 
-              const Spacer(),
+                  const SizedBox(height: 8),
 
-              // Buttons
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GrayButton(
-                        label: "다시 녹음",
-                        height: 45,
-                        onTap: _retryRecording,
-                      ),
+                  //컨트롤
+                  SizedBox(
+                    height: 34,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _togglePlay,
+                          child: Icon(
+                            _isPlaying
+                                ? Icons.pause_circle_filled
+                                : Icons.play_circle_filled,
+                            color: AppColors.baseYellow,
+                            size: 36,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(child: _buildSlider()),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: YellowMainButton(
-                        label: "네!",
-                        height: 45,
-                        onTap: _confirmRecording,
-                        // Reusing YellowMainButton with smaller dimensions
-                      ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    height: 45,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GrayButton(
+                            label: "다시 녹음",
+                            height: 45,
+                            onTap: _retryRecording,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: YellowMainButton(
+                            label: "네!",
+                            height: 45,
+                            onTap: _confirmRecording,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

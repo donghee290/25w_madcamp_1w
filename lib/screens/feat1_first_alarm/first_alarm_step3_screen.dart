@@ -5,7 +5,6 @@ import '../../theme/app_colors.dart';
 import '../../models/alarm_model.dart';
 import '../../providers/alarm_provider.dart';
 import '../../widgets/design_system_layouts.dart';
-// Removed unused button import
 import '../../widgets/missions/mission_step_badge.dart';
 import '../../widgets/mission_difficulty_selection_popup.dart';
 import 'outro_screen.dart';
@@ -29,13 +28,6 @@ class FirstAlarmStep3Screen extends StatefulWidget {
 }
 
 class _FirstAlarmStep3ScreenState extends State<FirstAlarmStep3Screen> {
-  // Mission State
-  // Removed unused fields: _difficulty, _count, _payload, _selectedType is likely needed for current implementation but was flagged?
-  // _selectedType was NOT flagged, but _difficulty etc were because they were only used in _onComplete which was removed? 
-  // Ah, I moved logic to `_createAlarmAndProceed`. 
-  // Let's re-examine usage.
-  
-  // Defaults per type (internal tracking)
   final Map<MissionType, int> _difficultyByType = {
     MissionType.math: 1,
     MissionType.colors: 1,
@@ -98,7 +90,7 @@ class _FirstAlarmStep3ScreenState extends State<FirstAlarmStep3Screen> {
       _countByType[newType] = newCount;
 
       // No need to setState unused variables
-      
+
       // Immediately create alarm and proceed
       _createAlarmAndProceed(newType, newDifficulty, newCount, newPayload);
     }
@@ -176,49 +168,43 @@ class _FirstAlarmStep3ScreenState extends State<FirstAlarmStep3Screen> {
                 fontWeight: FontWeight.w400,
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 120),
 
-            // Mission List
+            //Mission List
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: _types.map((type) {
-                    // Removed unused isSelected
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: SkyblueListItem(
-                        onTap: () => _openDetail(type),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 60,
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                children: [
-                                  Image.asset(
-                                    _iconOf(type),
-                                    width: 28,
-                                    height: 28,
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: Text(
-                                      _titleOf(type),
-                                      style: const TextStyle(
-                                        fontFamily: 'HYkanB',
-                                        fontSize: 18,
-                                        color: Color(0xFF5882B4),
-                                      ),
+                    return SkyblueListItem(
+                      onTap: () => _openDetail(type),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 60,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  _iconOf(type),
+                                  width: 28,
+                                  height: 28,
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    _titleOf(type),
+                                    style: const TextStyle(
+                                      fontFamily: 'HYkanB',
+                                      fontSize: 18,
+                                      color: Color(0xFF5882B4),
                                     ),
                                   ),
-                                  // Removed Check icon for cleaner look or consistent behavior
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   }).toList(),

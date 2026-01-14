@@ -147,11 +147,6 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
       _selectedSound = sound;
       if (recordingPath != null) _customRecordingPath = recordingPath;
       if (audioPath != null) _customAudioPath = audioPath;
-
-      // Clear others if switching types?
-      // Previous logic didn't strictly clear paths when switching away,
-      // but did separate them.
-      // We'll keep it simple.
     });
     _notifyChange();
     _playSound(sound);
@@ -189,16 +184,17 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     try {
       final File tempFile = File(path);
       final Directory appDocDir = await getApplicationDocumentsDirectory();
-      
-      // Create a unique filename
-      // Create a unique filename preserving original name
-      // Logic: original_timestamp.ext
+
       final String originalName = path.split(Platform.pathSeparator).last;
       final String extension = originalName.split('.').last;
-      final String nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
-      
+      final String nameWithoutExt = originalName.substring(
+        0,
+        originalName.lastIndexOf('.'),
+      );
+
       // Sanitize name just in case? unique enough with timestamp.
-      final String fileName = '${nameWithoutExt}_${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final String fileName =
+          '${nameWithoutExt}_${DateTime.now().millisecondsSinceEpoch}.$extension';
       final String newPath = '${appDocDir.path}/$fileName';
 
       // Copy the file to app storage
@@ -218,14 +214,10 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
       if (_customAudioPath != null && _customAudioPath!.isNotEmpty) {
         try {
           // Extract filename from path
-          String fileName = _customAudioPath!.split(Platform.pathSeparator).last;
-          
-          // Should we strip the timestamp we added? 
-          // Format: name_timestamp.ext
-          // Find the last underscore before the extension?
-          // It's heuristic. Let's try to strip the timestamp if it matches our format.
-          // Regex: (.*)_(\d+)\.(\w+)
-          // If no match, just return filename.
+          String fileName = _customAudioPath!
+              .split(Platform.pathSeparator)
+              .last;
+
           final RegExp regex = RegExp(r'^(.*)_(\d+)\.([^.]+)$');
           final match = regex.firstMatch(fileName);
           if (match != null) {
@@ -253,76 +245,70 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
         final iconAsset = (isRecording || isMyAudio)
             ? "assets/illusts/illust-record.png"
             : "assets/illusts/illust-sound.png";
-        
+
         // Determine label text
         String labelText = sound;
         if (isMyAudio && _customAudioPath != null) {
-          // If My Audio is selected, or we have a path cached? 
-          // User said "When audio is imported... display its name".
-          // It makes sense to show the name if valid.
           labelText = _getDisplayName(sound);
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: SkyblueListItem(
-            onTap: () {
-              if (isRecording) {
-                _showRecordingOverlay();
-              } else if (isMyAudio) {
-                _pickAudioFromDevice();
+        return SkyblueListItem(
+          onTap: () {
+            if (isRecording) {
+              _showRecordingOverlay();
+            } else if (isMyAudio) {
+              _pickAudioFromDevice();
+            } else {
+              if (isSelected) {
+                _audioPlayer.stop();
+                setState(() {
+                  _selectedSound = ''; // Deselect
+                  _sliderOpened = false;
+                });
+                widget.onSelectionChanged('', _volume);
               } else {
-                if (isSelected) {
-                  _audioPlayer.stop();
-                  setState(() {
-                    _selectedSound = ''; // Deselect
-                    _sliderOpened = false;
-                  });
-                  widget.onSelectionChanged('', _volume);
-                } else {
-                  _updateSelection(sound);
-                  setState(() {
-                    _sliderOpened = true;
-                  });
-                }
+                _updateSelection(sound);
+                setState(() {
+                  _sliderOpened = true;
+                });
               }
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 50,
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    children: [
-                      Image.asset(iconAsset, width: 24, height: 24),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(
-                          labelText,
-                          style: const TextStyle(
-                            fontFamily: 'HYkanB',
-                            fontSize: 16,
-                            color: Color(0xFF5882B4),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+            }
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 50,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    Image.asset(iconAsset, width: 24, height: 24),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        labelText,
+                        style: const TextStyle(
+                          fontFamily: 'HYkanB',
+                          fontSize: 18,
+                          color: Color(0xFF5882B4),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: showSlider
-                      ? Column(
-                          children: [SizedBox(height: 40, child: _buildSlider())],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: showSlider
+                    ? Column(
+                        children: [SizedBox(height: 40, child: _buildSlider())],
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ],
           ),
         );
       }).toList(),
