@@ -9,12 +9,12 @@ class SoundConstants {
   };
 
   static const String customRecordingKey = "직접 녹음하기";
-  
+
   static const String myAudioKey = "내 오디오 가져오기";
 
   static List<String> get soundOptions => [
-        ...soundFileMap.keys,
-        customRecordingKey,
-        myAudioKey,
-      ];
+    customRecordingKey,
+    myAudioKey,
+    ...soundFileMap.keys,
+  ];
 }

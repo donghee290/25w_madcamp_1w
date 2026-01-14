@@ -199,15 +199,23 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     try {
       await _audioPlayer.stop();
 
-      if (soundName.contains('/') ||
-          soundName.contains(Platform.pathSeparator)) {
+      String actualSoundName = soundName;
+      if (actualSoundName.startsWith("녹음한 음원 : ")) {
+        actualSoundName = actualSoundName.replaceFirst("녹음한 음원 : ", "");
+      } else if (actualSoundName.startsWith("나의 음원 : ")) {
+        actualSoundName = actualSoundName.replaceFirst("나의 음원 : ", "");
+      }
+
+      if (actualSoundName.contains('/') ||
+          actualSoundName.contains(Platform.pathSeparator)) {
         // Custom recording path
-        if (File(soundName).existsSync()) {
-          await _audioPlayer.play(DeviceFileSource(soundName));
+        if (File(actualSoundName).existsSync()) {
+          await _audioPlayer.play(DeviceFileSource(actualSoundName));
         }
       } else {
         // Ensure mapping exists or fallback
-        String assetPath = SoundConstants.soundFileMap[soundName] ?? '1.mp3';
+        String assetPath =
+            SoundConstants.soundFileMap[actualSoundName] ?? '1.mp3';
 
         // AssetSource automatically looks in 'assets/'.
         // Our map values are just filenames like '1.mp3', so we prepend 'sounds/'.
@@ -782,38 +790,51 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
   }
 
   String _getSoundDisplayName(String soundName) {
-    // 1. Check if it's a known Key (Preset Name)
-    if (SoundConstants.soundFileMap.containsKey(soundName)) {
-      return soundName;
+    String prefix = "";
+    String cleanName = soundName;
+
+    // Handle Prefixes
+    if (soundName.startsWith("녹음한 음원 : ")) {
+      prefix = "녹음한 음원 : ";
+      cleanName = soundName.replaceFirst("녹음한 음원 : ", "");
+    } else if (soundName.startsWith("나의 음원 : ")) {
+      prefix = "나의 음원 : ";
+      cleanName = soundName.replaceFirst("나의 음원 : ", "");
     }
 
-    // 2. Check if it's a known Value (Filename) -> Logically reverse map
-    // (This handles legacy/mixed state where filename was saved)
+    // 1. Check if trimmed name is a known Key (Preset Name)
+    // Note: If prefix exists, cleanName is a path, won't be a key unless key is path-like?
+    // Unlikely, but safe to check.
+    if (SoundConstants.soundFileMap.containsKey(cleanName)) {
+      return prefix + cleanName;
+    }
+
+    // 2. Check value (reverse map)
     for (var entry in SoundConstants.soundFileMap.entries) {
-      if (entry.value == soundName) {
-        return entry.key;
+      if (entry.value == cleanName) {
+        return prefix + entry.key;
       }
     }
 
     // 3. Check for specific keys
-    if (soundName == SoundConstants.customRecordingKey ||
-        soundName == SoundConstants.myAudioKey) {
-      return soundName;
+    if (cleanName == SoundConstants.customRecordingKey ||
+        cleanName == SoundConstants.myAudioKey) {
+      return prefix + cleanName;
     }
 
-    // 4. Check if it's a file path (Custom Audio)
-    if (soundName.contains('/') || soundName.contains(Platform.pathSeparator)) {
+    // 4. Check if it's a file path
+    if (cleanName.contains('/') || cleanName.contains(Platform.pathSeparator)) {
       try {
-        String fileName = soundName.split(Platform.pathSeparator).last;
+        String fileName = cleanName.split(Platform.pathSeparator).last;
         // Regex to clean timestamp: name_timestamp.ext
         final RegExp regex = RegExp(r'^(.*)_(\d+)\.(\w+)');
         final match = regex.firstMatch(fileName);
         if (match != null) {
-          return "${match.group(1)}.${match.group(3)}";
+          fileName = "${match.group(1)}.${match.group(3)}";
         }
-        return fileName;
+        return prefix + fileName;
       } catch (e) {
-        return "알 수 없는 파일";
+        return "${prefix}알 수 없는 파일";
       }
     }
 

@@ -90,13 +90,22 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
       await _audioPlayer.setVolume(_volume);
 
-      if (_soundName.contains('/') ||
-          _soundName.contains(Platform.pathSeparator)) {
-        if (File(_soundName).existsSync()) {
-          await _audioPlayer.play(DeviceFileSource(_soundName));
+      String actualSoundName = _soundName;
+      if (actualSoundName.startsWith("녹음한 음원 : ")) {
+        actualSoundName = actualSoundName.replaceFirst("녹음한 음원 : ", "");
+      } else if (actualSoundName.startsWith("나의 음원 : ")) {
+        actualSoundName = actualSoundName.replaceFirst("나의 음원 : ", "");
+      }
+
+      if (actualSoundName.contains('/') ||
+          actualSoundName.contains(Platform.pathSeparator)) {
+        if (File(actualSoundName).existsSync()) {
+          await _audioPlayer.play(DeviceFileSource(actualSoundName));
         }
       } else {
-        String assetPath = SoundConstants.soundFileMap[_soundName] ?? '1.mp3';
+        String assetPath = SoundConstants.soundFileMap[actualSoundName] ?? '1.mp3';
+        // AssetSource automatically looks in 'assets/'.
+        // Our map values are just filenames like '1.mp3', so we prepend 'sounds/'.
         await _audioPlayer.play(AssetSource("sounds/$assetPath"));
       }
     } catch (e) {

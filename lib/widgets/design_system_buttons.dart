@@ -100,6 +100,7 @@ class BlackSubButton extends StatelessWidget {
   final VoidCallback onTap;
   final double width;
   final double height;
+  final bool isSelected;
 
   const BlackSubButton({
     super.key,
@@ -107,6 +108,7 @@ class BlackSubButton extends StatelessWidget {
     required this.onTap,
     this.width = 95,
     this.height = 38,
+    this.isSelected = false,
   });
 
   @override
@@ -119,37 +121,48 @@ class BlackSubButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           // Spec: #6E6E7E -> #3E3E4E (same as primaryGradient)
-          gradient: AppColors.primaryGradient,
+          // If Selected: Secondary Gradient (Yellows)
+          gradient: isSelected ? AppColors.secondaryGradient : AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            width: 1,
-            color: AppColors.subButtonBorder, // #2E2E3E
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.shadowColor,
-              blurRadius: 2,
-              offset: Offset(2, 2),
-              inset: true,
-            ),
-            BoxShadow(
-              color: AppColors.shadowColor,
-              blurRadius: 2,
-              offset: Offset(-2, -2),
-              inset: true,
-            ),
-          ],
+          border: isSelected
+              ? null
+              : Border.all(
+                  width: 1,
+                  color: AppColors.subButtonBorder, // #2E2E3E
+                ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : const [
+                  BoxShadow(
+                    color: AppColors.shadowColor,
+                    blurRadius: 2,
+                    offset: Offset(2, 2),
+                    inset: true,
+                  ),
+                  BoxShadow(
+                    color: AppColors.shadowColor,
+                    blurRadius: 2,
+                    offset: Offset(-2, -2),
+                    inset: true,
+                  ),
+                ],
         ),
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.baseWhite,
-              fontSize: 18,
-              fontFamily: 'HYkanM',
-              fontWeight: FontWeight.w400,
+            style: TextStyle(
+              color: isSelected ? AppColors.baseBlue : AppColors.baseWhite,
+              fontSize: 14,
+              fontFamily: isSelected ? 'HYkanB' : 'HYkanM',
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
             ),
           ),
         ),

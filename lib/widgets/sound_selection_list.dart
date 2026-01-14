@@ -44,13 +44,26 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     _volume = widget.initialVolume;
     _loadSliderThumbImage();
 
-    if (_soundOptions.contains(widget.initialSound)) {
-      _selectedSound = widget.initialSound;
-    } else if (widget.initialSound.isNotEmpty) {
+    String initSound = widget.initialSound;
+
+    // Parse formatted strings
+    if (initSound.startsWith("녹음한 음원 : ")) {
+      _selectedSound = SoundConstants.customRecordingKey;
+      _customRecordingPath = initSound.replaceFirst("녹음한 음원 : ", "");
+    } else if (initSound.startsWith("나의 음원 : ")) {
       _selectedSound = SoundConstants.myAudioKey;
-      _customAudioPath = widget.initialSound;
+      _customAudioPath = initSound.replaceFirst("나의 음원 : ", "");
+    } else if (_soundOptions.contains(initSound)) {
+      _selectedSound = initSound;
     } else {
-      _selectedSound = "";
+      // Legacy handling or empty
+      if (initSound.isNotEmpty && File(initSound).existsSync()) {
+        // Assume My Audio if it's a file path but not formatted
+        _selectedSound = SoundConstants.myAudioKey;
+        _customAudioPath = initSound;
+      } else {
+        _selectedSound = "";
+      }
     }
 
     _sliderOpened = false;
@@ -111,37 +124,16 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
   }
 
   void _notifyChange() {
-    // Resolve effective sound string
+    // Resolve effective sound string with Prefix
     String resultSound = _selectedSound;
+    
     if (_selectedSound == SoundConstants.customRecordingKey &&
         _customRecordingPath != null) {
-      resultSound = _customRecordingPath!;
+      resultSound = "녹음한 음원 : $_customRecordingPath";
     } else if (_selectedSound == SoundConstants.myAudioKey &&
         _customAudioPath != null) {
-      resultSound = _customAudioPath!;
+      resultSound = "나의 음원 : $_customAudioPath";
     }
-
-    // If selecting 'recording' but no path yet, pass Key (parent handles or waits?)
-    // Actually parent usually waits for Next/Confirm.
-    // We pass the current internal state "key" or "path" if resolved?
-    // Let's pass the KEY if it's special, or the resolved path?
-    // The previous logic resolved it at the end.
-    // Let's pass the key, but also maybe the resolved path?
-    // For simplicity, let's behave like the UI state: Key.
-    // The parent can resolve it, or we resolve it.
-    // Let's stick to what _onNext/Confirm did:
-    // They checked `if (_selectedSound == Key)`.
-    // So we just update the parent with `_selectedSound` (which might be a key).
-    // BUT, the parent needs the file path if it is Key.
-
-    // Better idea: Pass the RESOLVED sound string to the parent immediately?
-    // If I pick "Record", and haven't recorded, value is "RecordKey".
-    // Parent receives "RecordKey".
-    // If I record, `_customRecordingPath` updates.
-    // I should call `widget.onSelectionChanged` with the resolved path?
-    // Step 2 logic:
-    // `if (_selectedSound == RecordKey && path != null) result = path`
-    // So yes, I should invoke callback whenever selection or path or volume changes.
 
     widget.onSelectionChanged(resultSound, _volume);
   }
