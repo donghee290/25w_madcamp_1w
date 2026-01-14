@@ -22,10 +22,12 @@ class FirstAlarmStep2Screen extends StatefulWidget {
 
 class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
   // Sound Selection State
+  final GlobalKey<SoundSelectionListState> _soundListKey = GlobalKey();
   String _selectedSound = "Good Morning(LG)";
   double _volume = 0.5;
 
   void _onNext() {
+    _soundListKey.currentState?.stopAudio();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => FirstAlarmStep3Screen(
@@ -78,6 +80,7 @@ class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
             // Sound List (Expanded)
             Expanded(
               child: SoundSelectionList(
+                key: _soundListKey,
                 initialSound: _selectedSound,
                 initialVolume: _volume,
                 onSelectionChanged: (sound, volume) {

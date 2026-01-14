@@ -914,6 +914,13 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                         }
                       },
                       onTap: () async {
+                        // Stop playing sound when opening popup
+                        await _audioPlayer.stop();
+                        if (!mounted) return;
+                        setState(() {
+                          _isSoundSliderVisible = false;
+                        });
+
                         final result = await showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.transparent,
@@ -957,6 +964,13 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                         // For now do nothing as requested is only for sound
                       },
                       onTap: () async {
+                        // Stop playing sound when opening popup
+                        await _audioPlayer.stop();
+                        if (!mounted) return;
+                        setState(() {
+                          _isSoundSliderVisible = false;
+                        });
+
                         final result = await showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.transparent,

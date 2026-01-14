@@ -45,6 +45,7 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
   void initState() {
     super.initState();
     dismissalTime = DateTime.now();
+    
     _calculateScore();
     _selectRandomImage();
     
@@ -151,7 +152,13 @@ class _AlarmResultScreenState extends State<AlarmResultScreen> {
     }
 
     final random = Random();
-    _randomImagePath = "assets/images/${images[random.nextInt(images.length)]}";
+    final int index = random.nextInt(images.length);
+    _randomImagePath = "assets/images/${images[index]}";
+    
+    debugPrint("DEBUG: Score: $score");
+    debugPrint("DEBUG: Image List Length: ${images.length}");
+    debugPrint("DEBUG: Selected Index: $index");
+    debugPrint("DEBUG: Selected Image: $_randomImagePath");
   }
   
   String _getScoreMessage(int score) {
