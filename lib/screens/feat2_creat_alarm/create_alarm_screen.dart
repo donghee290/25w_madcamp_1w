@@ -34,7 +34,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
   //Sound & Mission
   double _volume = 0.5;
-  String _soundName = "엘지 굿모닝송";
+  String _soundName = "Good Morning(LG)";
   bool _isSoundSliderVisible = false;
   String _missionName = "수학 문제";
   MissionType _missionType = MissionType.math;
@@ -999,13 +999,16 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
                     const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Text(
-                        _missionSummaryLine(),
-                        style: const TextStyle(
-                          color: Color(0xFFD9D9D9),
-                          fontSize: 12,
-                          fontFamily: 'HYkanM',
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          _missionSummaryLine(),
+                          style: const TextStyle(
+                            color: Color(0xFFD9D9D9),
+                            fontSize: 12,
+                            fontFamily: 'HYkanM',
+                          ),
                         ),
                       ),
                     ),
