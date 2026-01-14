@@ -22,7 +22,7 @@ class FirstAlarmStep2Screen extends StatefulWidget {
 
 class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
   // Sound Selection State
-  String _selectedSound = "일어나셔야 합니다"; // Default initial
+  String _selectedSound = "Good Morning(LG)";
   double _volume = 0.5;
 
   void _onNext() {
@@ -62,7 +62,7 @@ class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
             // Badges
             _buildStepBadges(),
             const SizedBox(height: 40),
-            
+
             // Title
             const Text(
               "기상 사운드는 뭘로 해줄까?",
@@ -91,14 +91,14 @@ class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
 
             // Next Button
             Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-               child: YellowMainButton(
-                 label: "다음",
-                 onTap: _onNext,
-                 width: double.infinity,
-                 height: 60,
-               ),
-             ),
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+              child: YellowMainButton(
+                label: "다음",
+                onTap: _onNext,
+                width: double.infinity,
+                height: 60,
+              ),
+            ),
           ],
         ),
       ),
