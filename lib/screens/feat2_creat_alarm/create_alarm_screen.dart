@@ -35,7 +35,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
 
   //Sound & Mission
   double _volume = 0.5;
-  String _soundName = "일어나셔야 합니다";
+  String _soundName = "엘지 굿모닝송";
   bool _isSoundSliderVisible = false;
   String _missionName = "수학 문제";
   MissionType _missionType = MissionType.math;
@@ -115,6 +115,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     if (widget.alarm != null) {
       final a = widget.alarm!;
       _labelController.text = a.label;
+      _soundName = a.soundFileName;
       _selectedWeekdays = List.from(a.weekdays);
       _isVibration = a.isVibration;
       _duration = a.duration;
@@ -785,7 +786,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     if (SoundConstants.soundFileMap.containsKey(soundName)) {
       return soundName;
     }
-    
+
     // 2. Check if it's a known Value (Filename) -> Logically reverse map
     // (This handles legacy/mixed state where filename was saved)
     for (var entry in SoundConstants.soundFileMap.entries) {
@@ -795,7 +796,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
     }
 
     // 3. Check for specific keys
-    if (soundName == SoundConstants.customRecordingKey || 
+    if (soundName == SoundConstants.customRecordingKey ||
         soundName == SoundConstants.myAudioKey) {
       return soundName;
     }
@@ -808,7 +809,7 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
         final RegExp regex = RegExp(r'^(.*)_(\d+)\.(\w+)');
         final match = regex.firstMatch(fileName);
         if (match != null) {
-          return "${match.group(1)}.${match.group(3)}"; 
+          return "${match.group(1)}.${match.group(3)}";
         }
         return fileName;
       } catch (e) {
@@ -907,8 +908,6 @@ class _CreateAlarmScreenState extends State<CreateAlarmScreen> {
                     _buildWeekdaySection(),
 
                     const SizedBox(height: 25),
-
-
 
                     _buildBlueBox(
                       "기상 사운드",
