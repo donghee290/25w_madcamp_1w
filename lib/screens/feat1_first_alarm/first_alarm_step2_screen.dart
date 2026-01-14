@@ -21,8 +21,7 @@ class FirstAlarmStep2Screen extends StatefulWidget {
 }
 
 class _FirstAlarmStep2ScreenState extends State<FirstAlarmStep2Screen> {
-  // Sound Selection State
-  String _selectedSound = "Good Morning(LG)";
+  String _selectedSound = "카이스트 거위";
   double _volume = 0.5;
 
   void _onNext() {

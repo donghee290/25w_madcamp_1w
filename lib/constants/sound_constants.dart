@@ -14,6 +14,7 @@ class SoundConstants {
     "각성음악(베타파, 감마파)": "12_각성음악(베타파, 감마파).mp3",
     "인강 강사들 공부자극 모음": "13_인강 강사들 공부자극 모음.mp3",
     "자연의 소리": "14_자연의 소리.mp3",
+    "카이스트 거위": "15_카이스트 거위.mp3",
   };
 
   static const String customRecordingKey = "직접 녹음하기";
