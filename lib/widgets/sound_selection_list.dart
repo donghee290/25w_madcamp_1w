@@ -129,10 +129,10 @@ class _SoundSelectionListState extends State<SoundSelectionList> {
     
     if (_selectedSound == SoundConstants.customRecordingKey &&
         _customRecordingPath != null) {
-      resultSound = "녹음한 음원 : $_customRecordingPath";
+      resultSound = _customRecordingPath!;
     } else if (_selectedSound == SoundConstants.myAudioKey &&
         _customAudioPath != null) {
-      resultSound = "나의 음원 : $_customAudioPath";
+      resultSound = _customAudioPath!;
     }
 
     widget.onSelectionChanged(resultSound, _volume);
