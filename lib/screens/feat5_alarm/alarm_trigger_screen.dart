@@ -24,7 +24,6 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   // Audio
   final AudioPlayer _audioPlayer = AudioPlayer();
   String _soundName = '15_카이스트 거위.mp3';
-  double _volume = 1.0;
 
   // Snooze Settings from Payload
   int _snoozeDurationMinutes = 5;
@@ -83,7 +82,6 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
       _soundName = widget.alarm.soundFileName;
       //_volume = widget.alarm.volume;
     }
-    _volume = 1.0;
   }
 
   Future<void> _playAlarmSound() async {
