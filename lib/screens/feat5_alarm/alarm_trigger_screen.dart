@@ -23,8 +23,8 @@ class AlarmTriggerScreen extends StatefulWidget {
 class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   // Audio
   final AudioPlayer _audioPlayer = AudioPlayer();
-  String _soundName = 'default_alarm.mp3';
-  double _volume = 0.5;
+  String _soundName = '15_카이스트 거위.mp3';
+  double _volume = 1.0;
 
   // Snooze Settings from Payload
   int _snoozeDurationMinutes = 5;
@@ -73,7 +73,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
       final parts = payload.split('|');
       if (parts.length >= 6) {
         _soundName = parts[4];
-        _volume = double.tryParse(parts[5]) ?? 0.5;
+        //_volume = double.tryParse(parts[5]) ?? 0.5;
         if (parts.length >= 8) {
           _snoozeDurationMinutes = int.tryParse(parts[6]) ?? 5;
           _currentSnoozeCount = int.tryParse(parts[7]) ?? 3;
@@ -81,14 +81,15 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
       }
     } else {
       _soundName = widget.alarm.soundFileName;
-      _volume = widget.alarm.volume;
+      //_volume = widget.alarm.volume;
     }
+    _volume = 1.0;
   }
 
   Future<void> _playAlarmSound() async {
     try {
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.setVolume(_volume);
+      await _audioPlayer.setVolume(1.0);
 
       String actualSoundName = _soundName;
       if (actualSoundName.startsWith("녹음한 음원 : ")) {
@@ -103,7 +104,8 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
           await _audioPlayer.play(DeviceFileSource(actualSoundName));
         }
       } else {
-        String assetPath = SoundConstants.soundFileMap[actualSoundName] ?? '1.mp3';
+        String assetPath =
+            SoundConstants.soundFileMap[actualSoundName] ?? '1.mp3';
         // AssetSource automatically looks in 'assets/'.
         // Our map values are just filenames like '1.mp3', so we prepend 'sounds/'.
         await _audioPlayer.play(AssetSource("sounds/$assetPath"));
@@ -151,7 +153,7 @@ class _AlarmTriggerScreenState extends State<AlarmTriggerScreen> {
   void _handleStartMission() {
     // If coming from Snooze (or just to be safe), ensure sound is playing
     _snoozeTimer?.cancel();
-    _playAlarmSound(); 
+    _playAlarmSound();
 
     Navigator.of(context).push(
       MaterialPageRoute(
